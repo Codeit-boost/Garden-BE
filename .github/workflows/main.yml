@@ -21,7 +21,7 @@ jobs:
       # Docker 이미지 빌드 및 푸시
       - name: Build and Push Docker image
         run: |
-          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-test-app
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-garden-app
           docker build \
             --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
             -t $IMAGE_NAME:latest .
@@ -48,7 +48,7 @@ jobs:
             docker rm my-app || true
 
             # 최신 Docker 이미지 가져오기
-            IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-test-app
+            IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-garden-app
             docker pull $IMAGE_NAME:latest
 
             # 새로운 컨테이너 실행

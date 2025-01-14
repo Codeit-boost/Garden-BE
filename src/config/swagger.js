@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Project Setup Template API',
+      title: 'Garden API',
       version: '1.0.0',
-      description: 'API documentation for Project Setup Template',
+      description: 'API documentation for Project Garden',
     },
     servers: [
         {
