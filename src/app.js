@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const api = require("./routers/index");
 const setupSwagger = require('./config/swagger');
-const { errorHandler } = require("./middlewares/errorHandler");
+const { errorMiddleware } = require("./middlewares/errorMiddleware");
 
 const app = express();
 
@@ -19,6 +19,6 @@ app.use("/api", api);
 setupSwagger(app);
 
 // 에러 핸들러 등록
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 module.exports = app;

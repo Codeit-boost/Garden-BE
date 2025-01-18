@@ -1,6 +1,6 @@
 const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
-const { ErrorCodes, CustomError } = require("../middlewares/errorHandler");
+const { ErrorCodes, CustomError } = require("../utils/error");
 const router = express.Router();
 
 // 실제 등록시
