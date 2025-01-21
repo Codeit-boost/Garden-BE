@@ -13,10 +13,121 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement()) // 기본 키
-  name      String   // 사용자 이름
-  password  String   // 비밀번호 (해싱된 값 저장)
-  createdAt DateTime @default(now())              // 생성 시간
-  updatedAt DateTime @updatedAt                   // 업데이트 시간
+/// 회원 테이블
+model Member {
+  id       Int      @id @default(autoincrement())
+  name     String   // 이름
+  alarm    Boolean? @default(false) // 알람
+  mode     String?  // 모드
+  sound    String?  // 소리
+
+  // 자신과의 다대다(M:N) 친구 관계
+  // - MemberFriend를 통해 연결
+  friendsMember MemberFriend[] @relation("MemberFriends_Member")
+  friendsFriend MemberFriend[] @relation("MemberFriends_Friend")
+
+  // 꽃과의 다대다(M:N) 관계
+  // - MemberFlower를 통해 연결
+  flowers MemberFlower[]
+
+  // 미션(1:N)
+  missions Mission[]
+
+  // 집중시간(1:N)
+  focusTimes FocusTime[]
+}
+
+/// 회원 간 친구 다대다 중간 테이블
+model MemberFriend {
+  memberId Int
+  friendId Int
+  status   FriendState @default(PENDING)
+
+  member Member @relation("MemberFriends_Member", fields: [memberId], references: [id])
+  friend Member @relation("MemberFriends_Friend", fields: [friendId], references: [id])
+
+  @@id([memberId, friendId])
+  @@map("member_friends")
+}
+
+enum FriendState {
+  PENDING // 친구 요청 상태
+  FRIEND  // 친구 상태
+}
+
+/// 꽃 테이블
+model Flower {
+  id         Int     @id @default(autoincrement())
+  name       String  // 꽃 이름
+  growthImg1 String? // 자라는 과정 1
+  growthImg2 String? // 자라는 과정 2
+  growthImg3 String? // 자라는 과정 3
+  bloomImg   String? // 활짝 폈을 때
+  witherImg  String? // 시듦
+
+  // Member와 다대다(M:N) -> MemberFlower 이용
+  members MemberFlower[]
+
+  // 특정 미션 수행 시 잠금 해제되는 꽃일 수 있음 (1:N)
+  missions Mission[]
+
+  // 집중시간 (1:N)
+  focusTimes FocusTime[]
+}
+
+/// 회원-꽃 다대다(M:N) 중간 테이블
+model MemberFlower {
+  memberId Int
+  flowerId Int
+  unlocked Boolean? @default(false) // 잠금해제 여부
+
+  member Member @relation(fields: [memberId], references: [id])
+  flower Flower @relation(fields: [flowerId], references: [id])
+
+  @@id([memberId, flowerId])
+}
+
+/// 미션 테이블 (회원 1명 당 여러 미션)
+model Mission {
+  id          Int     @id @default(autoincrement())
+  description String  // 어떤 미션
+  memberId    Int     // 미션 주인 (회원)
+  flowerId    Int?    // 잠금해제되는 꽃 (없을 수도 있음)
+
+  member Member  @relation(fields: [memberId], references: [id])
+  flower Flower? @relation(fields: [flowerId], references: [id])
+}
+
+/// 꽃말 테이블 (꽃 1개에 여러 꽃말 가능)
+model Floriography {
+  id            Int    @id @default(autoincrement())
+  flower        String
+  languageText  String // 꽃말
+}
+
+/// 집중시간 테이블 (회원 1명 : 여러 집중시간)
+model FocusTime {
+  id          Int           @id @default(autoincrement())
+  category    FocusCategory // 카테고리(예: 공부, 운동 등)
+  targetTime  Int           @default(0) // 목표 시간
+  time        Int           // 실제 달성 시간
+  flowerId    Int           // 어떤 꽃과 연동
+  memberId    Int           // 어떤 회원의 집중시간인지
+  createdAt   DateTime?     @default(now()) // 만든 시간
+  state       FocusState    @default(IN_PROGRESS) // 진행 상태 (진행중, 시듦, 활짝)
+
+  member Member @relation(fields: [memberId], references: [id])
+  flower Flower @relation(fields: [flowerId], references: [id])
+}
+
+enum FocusCategory {
+  STUDY
+  WORK
+  ETC
+}
+
+enum FocusState {
+  IN_PROGRESS  // "진행중"
+  WILTED       // "시듦"
+  BLOOMED      // "활짝"
 }
