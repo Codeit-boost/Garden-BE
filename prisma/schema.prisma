@@ -16,6 +16,7 @@ datasource db {
 /// 회원 테이블
 model Member {
   id       Int      @id @default(autoincrement())
+  kakaoUserId   String?   @unique// 카카오 로그인 사용자 ID
   name     String   // 이름
   alarm    Boolean? @default(false) // 알람
   mode     String?  // 모드
@@ -23,7 +24,9 @@ model Member {
 
   // 자신과의 다대다(M:N) 친구 관계
   // - MemberFriend를 통해 연결
+  // 내가 추가한 친구
   friendsMember MemberFriend[] @relation("MemberFriends_Member")
+  // 나를 친구로 하는 멤버
   friendsFriend MemberFriend[] @relation("MemberFriends_Friend")
 
   // 꽃과의 다대다(M:N) 관계
@@ -41,18 +44,11 @@ model Member {
 model MemberFriend {
   memberId Int
   friendId Int
-  status   FriendState @default(PENDING)
 
   member Member @relation("MemberFriends_Member", fields: [memberId], references: [id])
   friend Member @relation("MemberFriends_Friend", fields: [friendId], references: [id])
 
   @@id([memberId, friendId])
-  @@map("member_friends")
-}
-
-enum FriendState {
-  PENDING // 친구 요청 상태
-  FRIEND  // 친구 상태
 }
 
 /// 꽃 테이블
