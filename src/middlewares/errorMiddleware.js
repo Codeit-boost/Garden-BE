@@ -1,4 +1,5 @@
 const { Prisma } = require("@prisma/client");
+const { ErrorCodes, CustomError } = require('../utils/error');
 
 // errorHandler.js
 // app.js 에러 핸들러로 모든 라우트 관리
@@ -6,7 +7,7 @@ const { Prisma } = require("@prisma/client");
 // 커스텀 에러가 아닌 에러에 대한 추가 필요!
 const errorMiddleware = (err, req, res, next) => {
   try{
-    console.error(err);
+    console.log(err);
 
     if (err instanceof CustomError) {
       return res.status(err.code).json({
