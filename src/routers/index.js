@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const testRouters = require("./testRouters");
+const authRouters = require("./authRoutes");
+const memberRouters = require("./memberRoutes");
 
 /**
  * @swagger
@@ -10,4 +12,21 @@ const testRouters = require("./testRouters");
  */
 router.use("", testRouters);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: 인증 관련 API
+ */
+router.use("/auth", authRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Members
+ *   description: 회원 관리 API
+ */
+router.use("/members", memberRouters);
+
 module.exports = router;
+
