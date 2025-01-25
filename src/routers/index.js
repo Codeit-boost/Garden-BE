@@ -3,6 +3,9 @@ const router = express.Router();
 const testRouters = require("./testRouters");
 const flowerRouters = require("./flowerRouters");
 const missionRouters = require("./missionRouters");
+const authRouters = require("./authRoutes");
+const memberRouters = require("./memberRoutes");
+const focusTimeRouters = require('./focusTimeRouters.js');
 
 /**
  * @swagger
@@ -11,6 +14,24 @@ const missionRouters = require("./missionRouters");
  *   description: 테스트 API 관련 엔드포인트
  */
 router.use("", testRouters);
+router.use("", focusTimeRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: 인증 관련 API
+ */
+router.use("/auth", authRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Members
+ *   description: 회원 관리 API
+ */
+router.use("/members", memberRouters);
+
 
 /**
  * @swagger
