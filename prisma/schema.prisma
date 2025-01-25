@@ -86,7 +86,8 @@ model MemberFlower {
 /// 미션 테이블 (회원 1명 당 여러 미션)
 model Mission {
   id          Int     @id @default(autoincrement())
-  description String  // 어떤 미션
+  title       String  // 미션 이름
+  description String  // 미션 설명
   memberId    Int     // 미션 주인 (회원)
   flowerId    Int?    // 잠금해제되는 꽃 (없을 수도 있음)
 
@@ -95,11 +96,11 @@ model Mission {
 }
 
 /// 꽃말 테이블 (꽃 1개에 여러 꽃말 가능)
-model Floriography {
-  id            Int    @id @default(autoincrement())
-  flower        String
-  languageText  String // 꽃말
-}
+//model Floriography {
+//  id            Int    @id @default(autoincrement())
+//  flower        String
+//  languageText  String // 꽃말
+//}
 
 /// 집중시간 테이블 (회원 1명 : 여러 집중시간)
 model FocusTime {
