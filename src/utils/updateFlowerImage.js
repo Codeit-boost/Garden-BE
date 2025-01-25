@@ -1,5 +1,6 @@
-const prisma = require('@prisma/client').PrismaClient();
+const { PrismaClient } = require('@prisma/client');
 
+const prisma = new PrismaClient();
 /**
  * 누적 시간이 목표 시간의 4분의 1 이상일 때마다 꽃 이미지 ID 업데이트
  */
