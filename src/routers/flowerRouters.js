@@ -9,10 +9,7 @@ router.use(express.urlencoded({ extended: true }));
 
 //오늘의 꽃 & 꽃말
 // GET /api/flower/todayFlower
-router.get('/todayFlower', asyncHandler(async (req, res) => {
-  const flowerData = await getTodayFlower(req, res);
-  res.json(flowerData);
-}));
+router.get('/todayFlower', asyncHandler(getTodayFlower));
 
 /**
  * @swagger
