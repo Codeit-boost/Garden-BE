@@ -3,6 +3,7 @@ const router = express.Router();
 const testRouters = require("./testRouters");
 const authRouters = require("./authRoutes");
 const memberRouters = require("./memberRoutes");
+const focusTimeRouters = require('./focusTimeRouters.js');
 
 /**
  * @swagger
@@ -11,6 +12,7 @@ const memberRouters = require("./memberRoutes");
  *   description: 테스트 API 관련 엔드포인트
  */
 router.use("", testRouters);
+router.use("", focusTimeRouters);
 
 /**
  * @swagger
