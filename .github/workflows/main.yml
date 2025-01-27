@@ -22,7 +22,7 @@ jobs:
       - name: Build and Push Docker image
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-garden-app
-          docker build \
+          docker build --no-cache \
             --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
             --build-arg KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
             --build-arg KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
