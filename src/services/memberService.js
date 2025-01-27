@@ -3,6 +3,37 @@ const { ErrorCodes, CustomError } = require('../utils/error');
 
 const prisma = new PrismaClient();
 
+const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const results = await prisma.$queryRaw`
+    SELECT
+      m.id,
+      m.name,
+      COALESCE(SUM(ft.time), 0) AS "totalFocusTime"
+    FROM
+      "Member" m
+    LEFT JOIN
+      "FocusTime" ft
+    ON
+      m.id = ft."memberId"
+    GROUP BY
+      m.id
+    ORDER BY
+      "totalFocusTime" DESC
+    LIMIT ${limit} OFFSET ${offset};
+  `;
+
+  // BigInt 변환
+  // 프론트로 어떤 형식으로 시간을 보낼 건지 논의 필요!
+  const formattedResults = results.map((result) => ({
+    ...result,
+    totalFocusTime: result.totalFocusTime.toString(), // BigInt를 문자열로 변환
+  }));
+
+  return formattedResults;
+};
+
 const getMemberInfo = async (memberId) => {
   const member = await prisma.member.findUnique({
     where: { id: memberId },
@@ -72,6 +103,7 @@ const deleteFriend = async (memberId, friendId) => {
 };
 
 module.exports = {
+  getMembersWithTotalFocusTime,
   getMemberInfo,
   updateMemberInfo,
   deleteMemberAccount,
