@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const testRouters = require("./testRouters");
+const flowerRouters = require("./flowerRouters");
+const missionRouters = require("./missionRouters");
 const authRouters = require("./authRoutes");
 const memberRouters = require("./memberRoutes");
 const focusTimeRouters = require('./focusTimeRouters.js');
@@ -30,5 +32,21 @@ router.use("/auth", authRouters);
  */
 router.use("/members", memberRouters);
 
-module.exports = router;
 
+/**
+ * @swagger
+ * tags:
+ *   name: Flowers
+ *   description: 꽃 관련 API
+ */
+router.use("/flower", flowerRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Missions
+ *   description: 미션 관련 API
+ */
+router.use("/mission", missionRouters);
+
+module.exports = router;
