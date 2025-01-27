@@ -51,6 +51,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   };
 
   // 이 미들웨어를 거친 후 req.user == 로그인한 유저 정보  
+  // req.user.id
   next();
 });
 
