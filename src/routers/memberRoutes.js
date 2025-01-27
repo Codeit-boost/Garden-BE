@@ -6,6 +6,43 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/members:
+ *   get:
+ *     summary: 모든 멤버를 집중시간 총합 순으로 페이지네이션 조회
+ *     tags: [Members]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: 페이지당 항목 수
+ *     responses:
+ *       200:
+ *         description: 멤버 목록 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 members:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ */
+router.get('', memberControllers.getMembers);
+
+module.exports = router;
+/**
+ * @swagger
  * /api/members/me:
  *   get:
  *     summary: 회원 상세 정보 조회
