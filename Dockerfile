@@ -14,7 +14,7 @@ ENV KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
 ENV JWT_SECRET=${JWT_SECRET}
 
 # 작업 디렉토리 설정
-WORKDIR /usr/src/app
+WORKDIR /usr/src
 
 # package.json 복사 및 의존성 설치
 COPY package.json ./
