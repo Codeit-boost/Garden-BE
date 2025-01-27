@@ -1,20 +1,8 @@
 # Node.js 18.18.0 이미지를 사용
 FROM node:18.18.0
 
-# 빌드 타임 환경 변수 설정
-ARG DATABASE_URL
-ARG KAKAO_CLIENT_ID
-ARG KAKAO_REDIRECT_URI
-ARG JWT_SECRET
-
-# 런타임 환경 변수 설정
-ENV DATABASE_URL=${DATABASE_URL}
-ENV KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-ENV KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
-ENV JWT_SECRET=${JWT_SECRET}
-
 # 작업 디렉토리 설정
-WORKDIR /usr/src
+WORKDIR /usr/src/app
 
 # package.json 복사 및 의존성 설치
 COPY package.json ./
