@@ -61,7 +61,7 @@ const findOrCreateMember = async (kakaoUserId, nickname) => {
 
 const generateJWT = (member) => {
   return jwt.sign(
-    { id: member.id, nickname: member.name },
+    { id: member.id, name: member.name },
     JWT_SECRET,
     { expiresIn: '1h' }
   );
