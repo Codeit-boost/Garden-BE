@@ -14,7 +14,6 @@ const focusTimeRouters = require('./focusTimeRouters.js');
  *   description: 테스트 API 관련 엔드포인트
  */
 router.use("", testRouters);
-router.use("", focusTimeRouters);
 
 /**
  * @swagger
@@ -32,7 +31,6 @@ router.use("/auth", authRouters);
  */
 router.use("/members", memberRouters);
 
-
 /**
  * @swagger
  * tags:
@@ -48,5 +46,14 @@ router.use("/flower", flowerRouters);
  *   description: 미션 관련 API
  */
 router.use("/mission", missionRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: FocusTime
+ *   description: 집중시간 관련 API
+ */
+router.use("/focusTime", focusTimeRouters);
+
 
 module.exports = router;
