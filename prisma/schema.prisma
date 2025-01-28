@@ -104,7 +104,7 @@ model Floriography {
 /// 집중시간 테이블 (회원 1명 : 여러 집중시간)
 model FocusTime {
   id          Int           @id @default(autoincrement())
-  category    FocusCategory // 카테고리(예: 공부, 운동 등)
+  category    String // 카테고리(예: 공부, 운동 등)
   targetTime  Int           @default(0) // 목표 시간
   time        Int           // 실제 달성 시간
   flowerId    Int           // 어떤 꽃과 연동
@@ -114,12 +114,6 @@ model FocusTime {
 
   member Member @relation(fields: [memberId], references: [id])
   flower Flower @relation(fields: [flowerId], references: [id])
-}
-
-enum FocusCategory {
-  STUDY
-  WORK
-  ETC
 }
 
 enum FocusState {
