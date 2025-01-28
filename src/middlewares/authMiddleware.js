@@ -34,8 +34,8 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 
   // 사용자 정보를 req.user에 추가
   req.user = {
-    id: decode.id,
-    name: decode.name
+    id: decoded.id,
+    name: decoded.name
   };
 
   // 이 미들웨어를 거친 후 req.user == 로그인한 유저 정보  
