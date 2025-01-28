@@ -6,6 +6,7 @@ const missionRouters = require("./missionRouters");
 const authRouters = require("./authRoutes");
 const memberRouters = require("./memberRoutes");
 const focusTimeRouters = require('./focusTimeRouters.js');
+const statisticRouters = require('./statisticRouters.js');
 
 /**
  * @swagger
@@ -48,5 +49,14 @@ router.use("/flower", flowerRouters);
  *   description: 미션 관련 API
  */
 router.use("/mission", missionRouters);
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Statistic
+ *   description: 통계 관련 API
+ */
+router.use("/statistic", statisticRouters);
 
 module.exports = router;
