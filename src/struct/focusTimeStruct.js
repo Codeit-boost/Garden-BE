@@ -19,7 +19,6 @@ const UpdateFocusTimeCategory = s.object({
 });
 
 
-
 module.exports = {
     CreateFocusTime,
     UpdateFocusTimeCategory
