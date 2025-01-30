@@ -109,7 +109,7 @@ const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
 
 
 //집중 시간 미션(집중 시간 저장 시)
-const updateFocusTimeMission = asyncHandler(async(memberId, focusTime) => {
+const updateFocusTimeMission = async(memberId, focusTime) => {
   const missions = await prisma.memberMission.findMany({
     where: {
       memberId,
@@ -127,11 +127,11 @@ const updateFocusTimeMission = asyncHandler(async(memberId, focusTime) => {
       });
     }
   }
-});
+};
 
 
 // 심은 꽃 미션(새로운 꽃 심을 경우-집중 시간 저장 시)
-const updateTotalFlowerMission = asyncHandler(async(memberId) => {
+const updateTotalFlowerMission = async(memberId) => {
   const uniqueFlowers = await prisma.focusTime.findMany({
     where: { memberId: memberId},
     select: { flowerId: true },
@@ -156,7 +156,7 @@ const updateTotalFlowerMission = asyncHandler(async(memberId) => {
       });
     }
   }
-});
+};
 
 
  module.exports = {
