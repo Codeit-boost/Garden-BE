@@ -32,7 +32,7 @@ const getTodayFlower = async (req, res, next) => {
     const todayFlower = {
       name: flowerInfo.flowNm[0], 
       language: flowerInfo.flowLang[0], //꽃말
-      imageUrl: flowerInfo.imgUrl1[0],
+      //imageUrl: flowerInfo.imgUrl1[0],
     };
     res.json(todayFlower);
   } catch (error) {

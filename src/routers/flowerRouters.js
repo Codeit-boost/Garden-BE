@@ -42,9 +42,6 @@ router.get('/todayFlower', asyncHandler(getTodayFlower));
  *                 language:
  *                   type: string
  *                   example: "사랑"
- *                 imageUrl1:
- *                   type: string
- *                   example: "https://example.com/rose.jpg"
  *       500:
  *         description: "서버 오류가 발생했습니다."
  */
@@ -83,15 +80,6 @@ router.get('/search-flower', asyncHandler(searchFlower));
  *                   language:
  *                     type: string
  *                     example: "동경, 숭배"
- *                   imageUrl1:
- *                     type: string
- *                     example: "https://example.com/sunflower1.jpg"
- *                   imageUrl2:
- *                     type: string
- *                     example: "https://example.com/sunflower2.jpg"
- *                   imageUrl3:
- *                     type: string
- *                     example: "https://example.com/sunflower3.jpg"
  *       400:
  *         description: "꽃 이름을 입력해주세요."
  *       404:
