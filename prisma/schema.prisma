@@ -33,8 +33,8 @@ model Member {
   // - MemberFlower를 통해 연결
   flowers MemberFlower[]
 
-  // 미션(1:N)
-  missions Mission[]
+  // 미션 - 다대다로 변경
+  Missions MemberMission[]
 
   // 집중시간(1:N)
   focusTimes FocusTime[]
@@ -83,16 +83,34 @@ model MemberFlower {
   @@id([memberId, flowerId])
 }
 
-/// 미션 테이블 (회원 1명 당 여러 미션)
+/// 미션 테이블 
 model Mission {
   id          Int     @id @default(autoincrement())
   title       String  // 미션 이름
   description String  // 미션 설명
-  memberId    Int     // 미션 주인 (회원)
+  //memberId    Int     // 미션 주인 (회원)
   flowerId    Int?    // 잠금해제되는 꽃 (없을 수도 있음)
+  type        MissionType   //미션 종류
+  targetValue  Int     //미션 목표값
 
-  member Member  @relation(fields: [memberId], references: [id])
+  //member Member  @relation(fields: [memberId], references: [id])
   flower Flower? @relation(fields: [flowerId], references: [id])
+  memberMissions MemberMission[]
+}
+
+//회원-미션 중간 테이블
+model MemberMission{
+  id  Int @id @default(autoincrement())
+  memberId Int
+  missionId Int
+  startDate DateTime?   //연속 몇 일...미션때문에 일단 만들어 놓음
+  completed Boolean @default(false)   //성공 여부
+  lastUpdated  DateTime?           //연속 미션
+
+  member Member @relation(fields: [memberId], references: [id])
+  mission Mission @relation(fields: [missionId], references: [id])
+
+  @@unique([memberId, missionId])
 }
 
 /// 꽃말 테이블 (꽃 1개에 여러 꽃말 가능)
@@ -127,4 +145,10 @@ enum FocusState {
   IN_PROGRESS  // "진행중"
   WILTED       // "시듦"
   BLOOMED      // "활짝"
+}
+
+enum MissionType{
+  CONSECUTIVE_PLANTING    //'연속 심기 미션'
+  TOTAL_FLOWERS           //'가드너 미션 - 꽃 몇개 심음?
+  FOCUS_TIME              //'집중시간 미션'
 }

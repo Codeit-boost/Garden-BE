@@ -13,7 +13,11 @@ const getMyInfo = asyncHandler(async (req, res) => {
       friendsMember: true,
       friendsFriend: true,
       flowers: true,
-      missions: true,
+      memberMissions:{    //변경
+        include:{
+          mission: true
+        }
+      },
       focusTimes: true,
     },
   });
