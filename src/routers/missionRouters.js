@@ -1,10 +1,9 @@
 const express = require("express");
-const asyncHandler = require("../utils/asyncHandler");
 const router = express.Router();
-const { getMissions } = require('../controllers/missionController');
+const { getMissions, updateConsecutivePlantingMission, updateFocusTimeMission } = require('../controllers/missionController');
 
 
-router.get('/list', asyncHandler(getMissions));
+router.get('/list', getMissions);
 
 /**
  * @swagger
@@ -48,5 +47,10 @@ router.get('/list', asyncHandler(getMissions));
  *       500:
  *         description: "서버 오류"
  */
+
+router.get('/dailyMissionUpdate', updateConsecutivePlantingMission);
+
+
+router.post('/focusMissionUpdate', updateFocusTimeMission);
 
 module.exports = router;
