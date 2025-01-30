@@ -103,9 +103,9 @@ model MemberMission{
   id  Int @id @default(autoincrement())
   memberId Int
   missionId Int
-  startDate DateTime?   //연속 몇 일...미션때문에 일단 만들어 놓음
+  startDate DateTime?   //연속 미션 시작일자
   completed Boolean @default(false)   //성공 여부
-  lastUpdated  DateTime?           //연속 미션
+  lastUpdated  DateTime?           //연속 미션 업데이트 날짜
 
   member Member @relation(fields: [memberId], references: [id])
   mission Mission @relation(fields: [missionId], references: [id])
@@ -147,7 +147,7 @@ enum FocusState {
   BLOOMED      // "활짝"
 }
 
-enum MissionType{
+enum MissionType {
   CONSECUTIVE_PLANTING    //'연속 심기 미션'
   TOTAL_FLOWERS           //'가드너 미션 - 꽃 몇개 심음?
   FOCUS_TIME              //'집중시간 미션'

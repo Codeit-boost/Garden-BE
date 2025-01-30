@@ -36,12 +36,12 @@ const getMissions = asyncHandler(async(req, res) => {
 });
 
 
-//연속 심기 미션 업데이트(매일 1번)
+//연속 심기 미션 업데이트(로그인시..?)
 const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
   const memberId = req.user.id;
 
   try{
-    const today = new Date().setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);      //시간 자정으로 맞춤
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
@@ -49,7 +49,7 @@ const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
       where: {
         memberId,
         mission: { type: 'CONSECUTIVE_PLANTING' },
-        NOT: { lastUpdated: { gte: new Date(today) } },
+        NOT: { lastUpdated: { gte: new Date(today) } },   //오늘 이미 갱신된 미션 제외
         completed: false
       },
       include: {mission: true},
@@ -58,11 +58,15 @@ const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
     for (const plantingMission of missions){
       let reset = false;
 
+      //날짜 계산 편하게 자정으로 다 맞춤
+      const lastUpdated = plantingMission.lastUpdated? new Date(plantingMission.lastUpdated).setHours(0, 0, 0, 0) : null;
+      const startDate = plantingMission.startDate? new Date(plantingMission.startDate).setHours(0, 0, 0, 0) : null;
+
       //마지막 업데이트가 어제 이전이면 연속심기 초기화
-      if(!plantingMission.lastUpdated || plantingMission.lastUpdated < yesterday ){
+      if(!lastUpdated || lastUpdated < yesterday ){
         reset = true;
       }
-      if(reset || !plantingMission.startDate){
+      if(reset || !startDate){
         //미션 초기화 또는 새로 시작
         await prisma.memberMission.update({
           where: {id :plantingMission.id},
@@ -73,8 +77,8 @@ const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
           },
         });
       }else{
-        //연속심기 진행중
-        const days = Math.floor((today.getTime() - plantingMission.startDate.getTime()) / (24 * 60 * 60 * 1000)); //연속 일자
+        //연속심기 미션 완료한 경우
+        const days = Math.floor((today - startDate) / (24 * 60 * 60 * 1000)); //연속 일자
         if(days >= plantingMission.mission.targetValue -1){
           await prisma.memberMission.update({
             where: {id: plantingMission.id},
@@ -89,8 +93,8 @@ const updateConsecutivePlantingMission = asyncHandler(async(req, res) => {
             where: {id: plantingMission.id},
             data: {
               lastUpdated: today,       //lastUpdated만 업데이트
-            }
-          })
+            },
+          });
         }
       }
     }
@@ -125,12 +129,39 @@ const updateFocusTimeMission = asyncHandler(async(memberId, focusTime) => {
   }
 });
 
-// 심은 꽃 미션(새로운 꽃 심을 경우)
 
+// 심은 꽃 미션(새로운 꽃 심을 경우-집중 시간 저장 시)
+const updateTotalFlowerMission = asyncHandler(async(memberId) => {
+  const uniqueFlowers = await prisma.focusTime.findMany({
+    where: { memberId: memberId},
+    select: { flowerId: true },
+    distinct: ['flowerId'],
+  });
+  const cntUniqueFlowers = uniqueFlowers.length;  //심은 꽃 개수
+
+  const flowerMissions = await prisma.memberMission.findMany({
+    where: {
+      memberId,
+      mission: { type: 'TOTAL_FLOWERS'},
+      completed: false,
+    },
+    include: { mission: true},
+  });
+
+  for (const flowerMission of flowerMissions){
+    if(cntUniqueFlowers >= flowerMission.mission.targetValue){
+      await prisma.memberMission.update({
+        where: { id: mission.id },
+        data: { completed: true },
+      });
+    }
+  }
+});
 
 
  module.exports = {
     getMissions,
     updateConsecutivePlantingMission,
     updateFocusTimeMission,
+    updateTotalFlowerMission,
  };

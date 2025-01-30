@@ -48,9 +48,4 @@ router.get('/list', getMissions);
  *         description: "서버 오류"
  */
 
-router.get('/dailyMissionUpdate', updateConsecutivePlantingMission);
-
-
-router.post('/focusMissionUpdate', updateFocusTimeMission);
-
 module.exports = router;
