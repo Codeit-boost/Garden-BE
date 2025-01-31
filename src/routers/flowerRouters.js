@@ -2,6 +2,7 @@ const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const router = express.Router();
 const { getTodayFlower, searchFlower, getUnlockedFlowers } = require("../controllers/flowerController");
+const authMiddleware = require('../middlewares/authMiddleware');
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
@@ -55,7 +56,7 @@ router.get('/todayFlower', asyncHandler(async (req, res) => {
 
 //이름으로 꽃 찾기 -- 나의 정원에 있는 꽃말 때문에 혹시 몰라서 만들어 놓음
 // GET /api/flower/searchFlower
-router.get('/search-flower', asyncHandler(searchFlower));
+router.get('/search-flower', authMiddleware, asyncHandler(searchFlower));
 
 /**`
  * @swagger
@@ -105,7 +106,7 @@ router.get('/search-flower', asyncHandler(searchFlower));
 
 
 //사용자가 잠금 해제한 꽃
-router.get('/unlocked', asyncHandler(getUnlockedFlowers));
+router.get('/unlocked', authMiddleware, asyncHandler(getUnlockedFlowers));
 
 /**
  * @swagger
