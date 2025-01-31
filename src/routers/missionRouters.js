@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const asyncHandler = require('../utils/asyncHandler');
 const { getMissions } = require('../controllers/missionController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
