@@ -1,4 +1,5 @@
 const express = require('express');
+const asyncHandler = require('../utils/asyncHandler');
 const memberControllers = require('../controllers/memberControllers');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -38,7 +39,7 @@ const router = express.Router();
  *                   items:
  *                     type: object
  */
-router.get('', memberControllers.getMembers);
+router.get('', asyncHandler(memberControllers.getMembers));
 
 module.exports = router;
 /**
@@ -71,7 +72,7 @@ module.exports = router;
  *       401:
  *         description: 인증 실패
  */
-router.get('/me', authMiddleware, memberControllers.getMyInfo);
+router.get('/me', authMiddleware, asyncHandler(memberControllers.getMyInfo));
 
 /**
  * @swagger
@@ -108,7 +109,7 @@ router.get('/me', authMiddleware, memberControllers.getMyInfo);
  *       401:
  *         description: 인증 실패
  */
-router.put('/me', authMiddleware, memberControllers.updateMyInfo);
+router.put('/me', authMiddleware, asyncHandler(memberControllers.updateMyInfo));
 
 /**
  * @swagger
@@ -124,7 +125,7 @@ router.put('/me', authMiddleware, memberControllers.updateMyInfo);
  *       401:
  *         description: 인증 실패
  */
-router.delete('/me', authMiddleware, memberControllers.deleteMyAccount);
+router.delete('/me', authMiddleware, asyncHandler(memberControllers.deleteMyAccount));
 
 /**
  * @swagger
@@ -152,7 +153,7 @@ router.delete('/me', authMiddleware, memberControllers.deleteMyAccount);
  *       401:
  *         description: 인증 실패
  */
-router.post('/friend', authMiddleware, memberControllers.makeFriend);
+router.post('/friend', authMiddleware, asyncHandler(memberControllers.makeFriend));
 
 /**
  * @swagger
@@ -178,6 +179,6 @@ router.post('/friend', authMiddleware, memberControllers.makeFriend);
  *       401:
  *         description: 인증 실패
  */
-router.delete('/friend', authMiddleware, memberControllers.removeFriend);
+router.delete('/friend', authMiddleware, asyncHandler(memberControllers.removeFriend));
 
 module.exports = router;

@@ -1,22 +1,27 @@
 require('dotenv').config();
 const { PrismaClient } = require("@prisma/client");
 const { errorMiddleware } = require("../middlewares/errorMiddleware.js");
-const { calculateElapsedTime } = require("../utils/calculateTime.js");
+const { calculateElapsedTime, convertSecondsToString, convertStringToSeconds } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage } = require("../utils/updateFlowerImage.js");
-const { updateStateToBloomed } = require("../utils/updateFocusTimeState.js");
+const { updateState } = require("../utils/updateFocusTimeState.js");
 const prisma = new PrismaClient();
 
 /**
  * 집중시간 생성
  */
-const createFocusTime = async (focusTimeData) => {
+const createFocusTime = async (memberId, focusTimeData) => {
     try {
-        const { category, target_time, flower_id, member_id } = focusTimeData;
+        const member_id = memberId;
+        const { category, target_time, flower_id } = focusTimeData;
 
-        return await prisma.focusTime.create({
+
+        // requestBody로 받은 target_time을 HH:MM:SS 형태에서 초 단위로 변환
+        const targetTimeInSeconds = convertStringToSeconds(target_time);
+
+        const focusTime = await prisma.focusTime.create({
             data: {
                 category: category,
-                targetTime: target_time,    // 타이머 모드: target_time 지정, 스톱워치 모드: target_time 값 null
+                targetTime: targetTimeInSeconds,    // 타이머 모드: target_time 지정, 스톱워치 모드: target_time 값 0
                 time: 0,    // 초기 누적 집중 시간은 0
                 flowerId: flower_id,
                 memberId: member_id,
@@ -27,9 +32,27 @@ const createFocusTime = async (focusTimeData) => {
                 member: true    // 연관된 회원 정보 포함
             }
         });
+
+        return {
+            data: {
+                id: focusTime.id,
+                category: focusTime.category,
+                target_time: convertSecondsToString(focusTime.targetTime),
+                time: convertSecondsToString(focusTime.time),
+                currentFlowerImage: focusTime.flower.growthImg1,
+                flower_id: focusTime.flowerId,
+                member_id: focusTime.memberId,
+                createdAt: focusTime.createdAt,
+                state: focusTime.state
+            },
+            include: {
+                flower: focusTime.flower,
+                member: focusTime.member
+            }
+        };
     } catch (error) {
         console.error("Error creating focus time:", error);
-        throw error
+        throw error;
     }
 };
 
@@ -65,13 +88,12 @@ const getFocusTimeById = async (focusTimeId) => {
         focusTime.flowerId
     );
 
-
     return {
         data: {
             id: focusTime.id,
             category: focusTime.category,
-            target_time: focusTime.targetTime,
-            time: elapsedTime,  // 계산된 누적 집중시간
+            target_time: convertSecondsToString(focusTime.targetTime),
+            time: convertSecondsToString(elapsedTime),  // 계산된 누적 집중시간
             currentFlowerImage: currentFlowerImage, // 현재 단계 꽃 이미지 URL
             flower_id: focusTime.flowerId,
             member_id: focusTime.memberId,
@@ -120,8 +142,8 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
         data: {
             id: updatedFocusTime.id,
             category: updatedFocusTime.category,
-            target_time: updatedFocusTime.targetTime,
-            time: updatedFocusTime.time,
+            target_time: convertSecondsToString(updatedFocusTime.targetTime),
+            time: convertSecondsToString(updatedFocusTime.time),
             flower_id: updatedFocusTime.flowerId,
             member_id: updatedFocusTime.memberId,
             createdAt: updatedFocusTime.createdAt,
@@ -152,7 +174,7 @@ const updateFocusTimeRealTime = async () => {
                 focusTime.targetTime
             );
             
-            const { newState } = await updateStateToBloomed(
+            const newState = await updateState(
                 focusTime,
                 elapsedTime
             );
@@ -166,8 +188,8 @@ const updateFocusTimeRealTime = async () => {
 
             return {
                 id: focusTime.id,
-                time: elapsedTime,
-                targetTime: focusTime.targetTime,
+                target_time: convertSecondsToString(focusTime.targetTime),
+                time: convertSecondsToString(elapsedTime),
                 currentFlowerImage: currentFlowerImage, // 현재 단계 꽃 이미지 URL
                 state: newState
             };
@@ -218,8 +240,8 @@ const cancelFocusTimeById = async (focusTimeId) => {
             data: {
                 id: canceledFocusTime.id,
                 category: canceledFocusTime.category,
-                target_time: canceledFocusTime.targetTime,
-                time: canceledFocusTime.time,
+                target_time: convertSecondsToString(canceledFocusTime.targetTime),
+                time: convertSecondsToString(canceledFocusTime.time),
                 currentFlowerImage: currentFlowerImage,
                 flower_id: canceledFocusTime.flowerId,
                 member_id: canceledFocusTime.memberId,
