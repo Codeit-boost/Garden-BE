@@ -6,8 +6,7 @@ const s = require("superstruct")
 const CreateFocusTime = s.object({
     target_time: s.string(),
     flower_id: s.integer(),
-    category: s.string(),
-    member_id: s.integer()
+    category: s.string()
 });
 
 

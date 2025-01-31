@@ -7,7 +7,8 @@ const { CreateFocusTime, UpdateFocusTimeCategory, UpdateFocusTimeRealTime } = re
  */
 const createFocusTime = async (req, res) => {
     s.assert(req.body, CreateFocusTime);
-    const focusTime = await focusTimeService.createFocusTime(req.body);
+    const memberId = req.user.id;
+    const focusTime = await focusTimeService.createFocusTime(memberId, req.body);
     res.status(201).json(focusTime);
 };
 
@@ -44,27 +45,23 @@ const updateFocusTimeCategory = async (req, res) => {
  * 실시간 집중시간 정보 업데이트
  */
 const updateFocusTimeRealTime = async (req, res, next) => {
-    try {
-        // 요청 데이터 확인
-        if (req.body && Object.keys(req.body).length > 0) {
-            return res.status(400).json({
-                message: "이 API는 요청 데이터를 받지 않습니다."
-            });
-        }
-
-        const updates = await focusTimeService.updateFocusTimeRealTime();
-
-        if (updates.length === 0) {
-            return res.status(200).json({ message: "변경된 데이터가 없습니다."});
-        }
-
-        return res.status(200).json({
-            message: "집중시간이 업데이트되었습니다.",
-            updates,
+    // 요청 데이터 확인
+    if (req.body && Object.keys(req.body).length > 0) {
+        return res.status(400).json({
+            message: "이 API는 요청 데이터를 받지 않습니다."
         });
-    } catch (error) {        
-        next(error);
     }
+
+    const updates = await focusTimeService.updateFocusTimeRealTime();
+
+    if (updates.length === 0) {
+        return res.status(200).json({ message: "변경된 데이터가 없습니다."});
+    }
+
+    return res.status(200).json({
+        message: "집중시간이 업데이트되었습니다.",
+        updates,
+    });
 };
 
 

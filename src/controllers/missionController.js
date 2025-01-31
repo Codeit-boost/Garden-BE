@@ -4,11 +4,9 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const getMissions = async(req, res) => {
-    const userId = req.user.id;
-
-  try {
-    const missions = await prisma.mission.findMany({
-      where: { 
+  const userId = req.user.id;
+  const missions = await prisma.mission.findMany({
+    where: { 
         memberId: Number(userId)
       },
       include: { 
@@ -17,13 +15,7 @@ const getMissions = async(req, res) => {
       orderBy: { id: 'desc' },
     });
 
-    res.json(missions);
-  } catch (error) {
-    throw new CustomError(
-      ErrorCodes.InternalServerError, 
-      '미션 목록 조회 중 오류가 발생했습니다.'
-    );
-  }
+  res.json(missions);
 };
 
  module.exports = {

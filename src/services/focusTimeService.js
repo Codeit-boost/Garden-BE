@@ -9,9 +9,10 @@ const prisma = new PrismaClient();
 /**
  * 집중시간 생성
  */
-const createFocusTime = async (focusTimeData) => {
+const createFocusTime = async (memberId, focusTimeData) => {
     try {
-        const { category, target_time, flower_id, member_id } = focusTimeData;
+        const member_id = memberId;
+        const { category, target_time, flower_id } = focusTimeData;
 
 
         // requestBody로 받은 target_time을 HH:MM:SS 형태에서 초 단위로 변환
