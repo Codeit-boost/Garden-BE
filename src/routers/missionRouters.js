@@ -1,10 +1,11 @@
 const express = require("express");
-const asyncHandler = require("../utils/asyncHandler");
 const router = express.Router();
+
 const { getMissions } = require('../controllers/missionController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.get('/list', authMiddleware, asyncHandler(getMissions));
+
 
 /**
  * @swagger
