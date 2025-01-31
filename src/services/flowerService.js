@@ -4,11 +4,11 @@ const { CustomError, ErrorCodes } = require('../utils/error');
 const prisma = new PrismaClient();
 
 
-const findUnlockedFlowers = async(userId) => {
+const findUnlockedFlowers = async(memberId) => {
     try{
         const unlockedFlowers = await prisma.memberFlower.findMany({
             where: {
-                memberId: Number(userId),
+                memberId: Number(memberId),
                 unlocked: true
             },
             include:{

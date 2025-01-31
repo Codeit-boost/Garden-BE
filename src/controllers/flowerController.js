@@ -41,6 +41,7 @@ const getTodayFlower = async (req, res, next) => {
 };
 
 
+// 라벤더 & 메리골드..존재X문제해결필요
 const searchFlower = async (req, res) => {
   const name = req.query.name;
 
@@ -70,23 +71,35 @@ const searchFlower = async (req, res) => {
       throw new CustomError(ErrorCodes.NotFound, '검색 결과가 존재하지 않음');
     }
 
-    const flowerInfo = items.map(item => ({
-      name: item.flowNm[0],
-      language: item.flowLang[0],
-    }));
+    let flowerInfo;
+    
+    if (name === '장미') {
+      // 장미인 경우 두 번째 결과만 반환
+      flowerInfo = [{
+        name: items[1]?.flowNm[0],
+        language: items[1]?.flowLang[0],
+      }];
+    } else {
+      // 그 외에는 첫 번째 결과만 반환
+      flowerInfo = [{
+        name: items[0].flowNm[0],
+        language: items[0].flowLang[0],
+      }];
+    }
 
     res.json(flowerInfo);
   } catch (error) {
+    console.error(error);
     throw new CustomError(ErrorCodes.InternalServerError, '서버 오류가 발생했습니다.');
   }
 };
 
 
 const getUnlockedFlowers = async (req, res, next) => {
-  const userId = req.user.id;
+  const memberId = req.user.id;
 
   try{
-    const unlockedFlowers = await flowerService.findUnlockedFlowers(userId);
+    const unlockedFlowers = await flowerService.findUnlockedFlowers(memberId);
     res.json(unlockedFlowers);
   } catch (error) {
     next(error);
