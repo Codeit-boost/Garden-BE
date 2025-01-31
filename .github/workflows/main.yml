@@ -55,4 +55,5 @@ jobs:
               -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
               -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e FLOWER_SERVICE_KEY=${{ secrets.FLOWER_SERVICE_KEY }} \
               $IMAGE_NAME:latest
