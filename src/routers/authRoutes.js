@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
-const authMiddleware = require("../middlewares/authMiddleware")
+const authMiddleware = require("../middlewares/authMiddleware");
+const asyncHandler = require("../utils/asyncHandler");
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.get('/kakao', authController.kakaoLoginURL);
  *       500:
  *         description: 로그인 실패
  */
-router.get('/kakao/callback', authController.kakaoCallback);
+router.get('/kakao/callback', asyncHandler(authController.kakaoCallback));
 
 /**
  * @swagger
@@ -109,6 +110,6 @@ router.post('/logout', authController.logout);
  *       401:
  *         description: 인증 실패 (토큰 없음 또는 유효하지 않음)
  */
-router.get('/me', authMiddleware, authController.getAuthenticatedUser);
+router.get('/me', authMiddleware,  asyncHandler(authController.getAuthenticatedUser));
 
 module.exports = router;
