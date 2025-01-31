@@ -1,36 +1,27 @@
-const { PrismaClient } = require('@prisma/client');
-const { ErrorCodes, CustomError } = require('../utils/error');
-const asyncHandler = require('../utils/asyncHandler.js');
+const memberService = require('../services/memberService');
 
-const prisma = new PrismaClient();
+// 모든 회원 조회 (총 집중시간 순으로)
+const getMembers = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
+  const members = await memberService.getMembersWithTotalFocusTime(parseInt(page), parseInt(limit));
+
+  res.status(200).json({
+    page: parseInt(page),
+    limit: parseInt(limit),
+    members,
+  });
+};
 
 // 현재 회원 정보 조회
-const getMyInfo = asyncHandler(async (req, res) => {
+const getMyInfo = async (req, res) => {
   const memberId = req.user.id;
-  const member = await prisma.member.findUnique({
-    where: { id: memberId },
-    include: {
-      friendsMember: true,
-      friendsFriend: true,
-      flowers: true,
-      memberMissions:{    //변경
-        include:{
-          mission: true
-        }
-      },
-      focusTimes: true,
-    },
-  });
-
-  if (!member) {
-    throw new CustomError(ErrorCodes.NotFound, '해당 회원 정보가 없습니다.');
-  }
-
-  res.status(200).json(member);
-});
+  const memberInfo = await memberService.getMemberInfo(memberId);
+  res.status(200).json(memberInfo);
+};
 
 // 현재 회원 정보 수정
-const updateMyInfo = asyncHandler(async (req, res) => {
+const updateMyInfo = async (req, res) => {
   const memberId = req.user.id;
   const { name, alarm, mode, sound } = req.body;
 
@@ -40,74 +31,37 @@ const updateMyInfo = asyncHandler(async (req, res) => {
   if (mode !== undefined) dataToUpdate.mode = mode;
   if (sound !== undefined) dataToUpdate.sound = sound;
 
-  const updatedMember = await prisma.member.update({
-    where: { id: memberId },
-    data: dataToUpdate,
-  });
-
+  const updatedMember = await memberService.updateMemberInfo(memberId, dataToUpdate);
   res.status(200).json(updatedMember);
-});
+};
 
 // 현재 회원 삭제
-const deleteMyAccount = asyncHandler(async (req, res) => {
+const deleteMyAccount = async (req, res) => {
   const memberId = req.user.id;
-
-  await prisma.member.delete({
-    where: { id: memberId },
-  });
-
+  await memberService.deleteMemberAccount(memberId);
   res.status(204).send();
-});
+};
 
 // 친구 추가
-const makeFriend = asyncHandler(async (req, res) => {
+const makeFriend = async (req, res) => {
   const { friendId } = req.body;
   const memberId = req.user.id;
 
-  const existingRequest = await prisma.memberFriend.findUnique({
-    where: {
-      memberId_friendId: {
-        memberId,
-        friendId,
-      },
-    },
-  });
-
-  if (existingRequest) {
-    throw new CustomError(
-      ErrorCodes.BadRequest,
-      'Friend request already exists or you are already friends.'
-    );
-  }
-
-  const friendRequest = await prisma.memberFriend.create({
-    data: {
-      memberId,
-      friendId,
-    },
-  });
-
+  const friendRequest = await memberService.addFriend(memberId, friendId);
   res.status(201).json({ message: 'Friend request sent successfully.', friendRequest });
-});
+};
 
 // 친구 삭제
-const removeFriend = asyncHandler(async (req, res) => {
+const removeFriend = async (req, res) => {
   const { friendId } = req.body;
   const memberId = req.user.id;
 
-  await prisma.memberFriend.delete({
-    where: {
-      memberId_friendId: {
-        memberId,
-        friendId,
-      },
-    },
-  });
-
+  await memberService.deleteFriend(memberId, friendId);
   res.status(204).send();
-});
+};
 
 module.exports = {
+  getMembers,
   getMyInfo,
   updateMyInfo,
   deleteMyAccount,

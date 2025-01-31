@@ -1,9 +1,47 @@
 const express = require('express');
+const asyncHandler = require('../utils/asyncHandler');
 const memberControllers = require('../controllers/memberControllers');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/members:
+ *   get:
+ *     summary: 모든 멤버를 집중시간 총합 순으로 페이지네이션 조회
+ *     tags: [Members]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: 페이지당 항목 수
+ *     responses:
+ *       200:
+ *         description: 멤버 목록 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 members:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ */
+router.get('', asyncHandler(memberControllers.getMembers));
+
+module.exports = router;
 /**
  * @swagger
  * /api/members/me:
@@ -34,7 +72,7 @@ const router = express.Router();
  *       401:
  *         description: 인증 실패
  */
-router.get('/me', authMiddleware, memberControllers.getMyInfo);
+router.get('/me', authMiddleware, asyncHandler(memberControllers.getMyInfo));
 
 /**
  * @swagger
@@ -71,7 +109,7 @@ router.get('/me', authMiddleware, memberControllers.getMyInfo);
  *       401:
  *         description: 인증 실패
  */
-router.put('/me', authMiddleware, memberControllers.updateMyInfo);
+router.put('/me', authMiddleware, asyncHandler(memberControllers.updateMyInfo));
 
 /**
  * @swagger
@@ -87,7 +125,7 @@ router.put('/me', authMiddleware, memberControllers.updateMyInfo);
  *       401:
  *         description: 인증 실패
  */
-router.delete('/me', authMiddleware, memberControllers.deleteMyAccount);
+router.delete('/me', authMiddleware, asyncHandler(memberControllers.deleteMyAccount));
 
 /**
  * @swagger
@@ -115,7 +153,7 @@ router.delete('/me', authMiddleware, memberControllers.deleteMyAccount);
  *       401:
  *         description: 인증 실패
  */
-router.post('/friend', authMiddleware, memberControllers.makeFriend);
+router.post('/friend', authMiddleware, asyncHandler(memberControllers.makeFriend));
 
 /**
  * @swagger
@@ -141,6 +179,6 @@ router.post('/friend', authMiddleware, memberControllers.makeFriend);
  *       401:
  *         description: 인증 실패
  */
-router.delete('/friend', authMiddleware, memberControllers.removeFriend);
+router.delete('/friend', authMiddleware, asyncHandler(memberControllers.removeFriend));
 
 module.exports = router;

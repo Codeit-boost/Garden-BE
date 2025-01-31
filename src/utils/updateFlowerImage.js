@@ -1,16 +1,17 @@
-const { PrismaClient } = require('@prisma/client');
-
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+
+
 /**
- * 누적 시간이 목표 시간의 4분의 1 이상일 때마다 꽃 이미지 ID 업데이트
+ * 누적 시간이 목표 시간의 4분의 1 이상일 때마다 해당하는 단계의 꽃 이미지 url 반환
  */
-const updateFlowerId = async (elapsedTime, targetTime, flowerId) => {
+const getUpdatedFlowerImage = async (elapsedTime, targetTime, flowerId) => {
 
     // 타이머 모드
     if (targetTime) {
         const quarter = targetTime / 4;
         
-        // 0: growthImg1, 1: growthImg2, 2: growthImg3
+        // 0: growthImg1, 1: growthImg2, 2: growthImg3, 3: bloomImg
         const flowerIndex = Math.min(Math.floor(elapsedTime / quarter), 3);
 
         // 꽃 이미지 가져오기
@@ -35,14 +36,14 @@ const updateFlowerId = async (elapsedTime, targetTime, flowerId) => {
             // 목표 시간에 도달하지 못하면 누적 시간에 따라 꽃 이미지 변경
             return flowerImages[flowerIndex];
         }
-        return null;
+        return null;    // 꽃 객체가 없는 경우 null 반환
     }
 
     // 스톱워치 모드
     else {
         const quarter = 180 / 4;
 
-        // 0: growthImg1, 1: growthImg2, 2: growthImg3
+        // 0: growthImg1, 1: growthImg2, 2: growthImg3, 3: bloomImg
         const flowerIndex = Math.min(Math.floor(elapsedTime / quarter), 3);
 
         // 꽃 이미지 가져오기
@@ -72,5 +73,5 @@ const updateFlowerId = async (elapsedTime, targetTime, flowerId) => {
 
 
 module.exports = {
-    updateFlowerId
+    getUpdatedFlowerImage
 };

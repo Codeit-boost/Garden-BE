@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { getMissions, updateConsecutivePlantingMission, updateFocusTimeMission } = require('../controllers/missionController');
 
+const { getMissions } = require('../controllers/missionController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-router.get('/list', getMissions);
+router.get('/list', authMiddleware, asyncHandler(getMissions));
+
 
 /**
  * @swagger

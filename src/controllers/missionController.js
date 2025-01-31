@@ -4,12 +4,11 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-const getMissions = asyncHandler(async(req, res) => {
-    const userId = req.user.id;
 
-  try {
-    const missions = await prisma.memberMission.findMany({
-      where: { 
+const getMissions = async(req, res) => {
+  const userId = req.user.id;
+  const missions = await prisma.memberMission.findMany({
+    where: { 
         memberId: Number(userId)
       },
       include: { 
@@ -25,7 +24,6 @@ const getMissions = asyncHandler(async(req, res) => {
         }
       },
     });
-
     res.json(missions);
   } catch (error) {
     throw new CustomError(
@@ -156,6 +154,7 @@ const updateTotalFlowerMission = async(memberId) => {
       });
     }
   }
+  res.json(missions);
 };
 
 

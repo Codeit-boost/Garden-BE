@@ -22,9 +22,7 @@ jobs:
       - name: Build and Push Docker image
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-garden-app
-          docker build \
-            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
-            -t $IMAGE_NAME:latest .
+          docker build --no-cache -t $IMAGE_NAME:latest .
           docker push $IMAGE_NAME:latest
 
   deploy:
@@ -52,4 +50,10 @@ jobs:
             docker pull $IMAGE_NAME:latest
 
             # 새로운 컨테이너 실행
-            docker run -d --name my-app -p 80:3000 $IMAGE_NAME:latest
+            docker run -d --name my-app -p 3000:3000 \
+              -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e FLOWER_SERVICE_KEY=${{ secrets.FLOWER_SERVICE_KEY }} \
+              $IMAGE_NAME:latest

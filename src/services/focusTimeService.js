@@ -1,21 +1,27 @@
 require('dotenv').config();
 const { PrismaClient } = require("@prisma/client");
 const { errorMiddleware } = require("../middlewares/errorMiddleware.js");
-const { calculateElapsedTime } = require("../utils/calculateTime.js");
-const { updateFlowerId } = require("../utils/updateFlowerImage.js");
+const { calculateElapsedTime, convertSecondsToString, convertStringToSeconds } = require("../utils/calculateTime.js");
+const { getUpdatedFlowerImage } = require("../utils/updateFlowerImage.js");
+const { updateState } = require("../utils/updateFocusTimeState.js");
 const prisma = new PrismaClient();
 
 /**
  * 집중시간 생성
  */
-const createFocusTime = async (focusTimeData) => {
+const createFocusTime = async (memberId, focusTimeData) => {
     try {
-        const { category, target_time, flower_id, member_id } = focusTimeData;
+        const member_id = memberId;
+        const { category, target_time, flower_id } = focusTimeData;
 
-        return await prisma.focusTime.create({
+
+        // requestBody로 받은 target_time을 HH:MM:SS 형태에서 초 단위로 변환
+        const targetTimeInSeconds = convertStringToSeconds(target_time);
+
+        const focusTime = await prisma.focusTime.create({
             data: {
                 category: category,
-                targetTime: target_time,    // 타이머 모드: target_time 지정, 스톱워치 모드: target_time 값 null
+                targetTime: targetTimeInSeconds,    // 타이머 모드: target_time 지정, 스톱워치 모드: target_time 값 0
                 time: 0,    // 초기 누적 집중 시간은 0
                 flowerId: flower_id,
                 memberId: member_id,
@@ -26,9 +32,27 @@ const createFocusTime = async (focusTimeData) => {
                 member: true    // 연관된 회원 정보 포함
             }
         });
+
+        return {
+            data: {
+                id: focusTime.id,
+                category: focusTime.category,
+                target_time: convertSecondsToString(focusTime.targetTime),
+                time: convertSecondsToString(focusTime.time),
+                currentFlowerImage: focusTime.flower.growthImg1,
+                flower_id: focusTime.flowerId,
+                member_id: focusTime.memberId,
+                createdAt: focusTime.createdAt,
+                state: focusTime.state
+            },
+            include: {
+                flower: focusTime.flower,
+                member: focusTime.member
+            }
+        };
     } catch (error) {
         console.error("Error creating focus time:", error);
-        throw error
+        throw error;
     }
 };
 
@@ -51,22 +75,34 @@ const getFocusTimeById = async (focusTimeId) => {
         throw new NotFoundError("해당 집중시간 정보가 존재하지 않습니다.");
     }
 
-    const time = calculateElapsedTime(focusTime.createdAt, focusTime.targetTime);
+    // 누적 집중시간 계산하기
+    const elapsedTime = calculateElapsedTime(
+        focusTime.createdAt,
+        focusTime.targetTime
+    );
+    
+    // 현재 단계에 해당하는 꽃 이미지 URL 가져오기
+    const currentFlowerImage = await getUpdatedFlowerImage(
+        elapsedTime,
+        focusTime.targetTime,
+        focusTime.flowerId
+    );
 
     return {
         data: {
             id: focusTime.id,
             category: focusTime.category,
-            target_time: focusTime.targetTime,
-            time: time,  // 계산된 누적 집중시간
+            target_time: convertSecondsToString(focusTime.targetTime),
+            time: convertSecondsToString(elapsedTime),  // 계산된 누적 집중시간
+            currentFlowerImage: currentFlowerImage, // 현재 단계 꽃 이미지 URL
             flower_id: focusTime.flowerId,
             member_id: focusTime.memberId,
             createdAt: focusTime.createdAt,
             state: focusTime.state
         },
         include: {
-            flower: true,
-            member: true
+            flower: focusTime.flower,
+            member: focusTime.member
         }
     };
 };
@@ -106,44 +142,59 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
         data: {
             id: updatedFocusTime.id,
             category: updatedFocusTime.category,
-            target_time: updatedFocusTime.targetTime,
-            time: updatedFocusTime.time,
+            target_time: convertSecondsToString(updatedFocusTime.targetTime),
+            time: convertSecondsToString(updatedFocusTime.time),
             flower_id: updatedFocusTime.flowerId,
             member_id: updatedFocusTime.memberId,
             createdAt: updatedFocusTime.createdAt,
             state: updatedFocusTime.state
         },
         include: {
-            flower: true,
-            member: true
+            flower: updatedFocusTime.flower,
+            member: updatedFocusTime.member
         }
     };
 };
 
 
 /**
- * 실시간 집중시간 및 꽃 사진 업데이트
+ * 실시간 집중시간 정보 업데이트
  */
 const updateFocusTimeRealTime = async () => {
     const focusTimes = await prisma.focusTime.findMany({
-        where: { state: 'IN_PROGRESS' }
+        where: { state: 'IN_PROGRESS' },
+        include: { flower: true }
     });
 
-    const updates = focusTimes.map(async (focusTime) => {
-        const elapsedTime = calculateElapsedTime(focusTime.createdAt, focusTime.targetTime);
-        const updatedFlowerId = updateFlowerId(elapsedTime, focusTime.targetTime, focusTime.flowerId);
-        
-        // flowerId가 변경되면 해당 flowerId로 업데이트
-        if (updatedFlowerId !== focusTime.flowerId) {
-            await prisma.focusTime.update({
-                where: { id: focusTime.id },
-                data: { flowerId: updateFlowerId }
-            });
-            return { id: focusTime.id, elapsedTime, flowerId: updateFlowerId }
-        }
-        return null;
-    });
+    const updates = await Promise.all(
+        focusTimes.map(async (focusTime) => {
+            
+            const elapsedTime = calculateElapsedTime(
+                focusTime.createdAt,
+                focusTime.targetTime
+            );
+            
+            const newState = await updateState(
+                focusTime,
+                elapsedTime
+            );
 
+            // 현재 단계에 해당하는 꽃 이미지 URL 가져오기
+            const currentFlowerImage = await getUpdatedFlowerImage(
+                elapsedTime,
+                focusTime.targetTime,
+                focusTime.flowerId
+            );
+
+            return {
+                id: focusTime.id,
+                target_time: convertSecondsToString(focusTime.targetTime),
+                time: convertSecondsToString(elapsedTime),
+                currentFlowerImage: currentFlowerImage, // 현재 단계 꽃 이미지 URL
+                state: newState
+            };
+        })
+    );
     // 업데이트된 데이터 반환
     return (await Promise.all(updates)).filter((update) => update !== null);
 };
@@ -171,16 +222,13 @@ const cancelFocusTimeById = async (focusTimeId) => {
     // 타이머 모드일 경우에만 진행
     if (focusTime.state === 'IN_PROGRESS' && focusTime.targetTime) {
         // 시든 이미지 가져오기
-        const flower = await prisma.flower.findUnique({
-            where: { id: focusTime.flowerId }
-        });
+        const currentFlowerImage = focusTime.flower.witherImg;
 
         const canceledFocusTime = await prisma.focusTime.update({
             where: { id: parsedFocusTimeId },
             data: {
                 state: 'WILTED',
-                time: 0,
-                flowerId: focusTime.flowerId
+                time: 0,    // 시간을 0으로 초기화
             },
             include: {
                 flower: true,
@@ -192,20 +240,21 @@ const cancelFocusTimeById = async (focusTimeId) => {
             data: {
                 id: canceledFocusTime.id,
                 category: canceledFocusTime.category,
-                target_time: canceledFocusTime.targetTime,
-                time: canceledFocusTime.time,
+                target_time: convertSecondsToString(canceledFocusTime.targetTime),
+                time: convertSecondsToString(canceledFocusTime.time),
+                currentFlowerImage: currentFlowerImage,
                 flower_id: canceledFocusTime.flowerId,
                 member_id: canceledFocusTime.memberId,
                 createdAt: canceledFocusTime.createdAt,
                 state: canceledFocusTime.state
             },
             include: {
-                flower: true,
-                member: true
+                flower: canceledFocusTime.flower,
+                member: canceledFocusTime.member
             }
         };
     }
-}
+};
 
 
 

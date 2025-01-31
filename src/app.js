@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -7,7 +9,6 @@ const { errorMiddleware } = require("./middlewares/errorMiddleware");
 
 // const http = require('http');
 // const { startWebSocketServer } = require('./services/webSocketServer.js');
-const focusTimeRouter = require('./routers/focusTimeRouters.js');
 
 const app = express();
 // const server = http.createServer(app);
