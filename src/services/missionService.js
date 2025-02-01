@@ -89,14 +89,15 @@ const updateConsecutivePlantingMission = async(memberId) => {
             }
             }
         }
-        return completedMissions;       //완료한 미션 반환하도록 해놓음
+        console.log(completedMissions);     //점검용
+        return completedMissions;       //완료한 미션 반환
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '연속 미션 업데이트 중 오류가 발생하였습니다.');
     }
 };
   
 
-//집중 시간 미션(집중 시간 저장 시) - 반환값 X
+//집중 시간 미션(집중 시간 저장 시)
 const updateFocusTimeMission = async(memberId, focusTime) => {
     try{
         const missions = await prisma.memberMission.findMany({
@@ -108,14 +109,18 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
         include: {mission: true},
         });
     
+        const completedMissions = [];
+
         for (const focusMission of missions){
             if(focusTime >= focusMission.mission.targetValue){
                 await prisma.memberMission.update({
                     where: {id: focusMission.id},
                     data: {completed: true},
                 });
+                completedMissions.push(focusMission.id);
             }
         }
+        return completedMissions;
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '집중시간 미션 업데이트 중 오류가 발생하였습니다.');
     }
@@ -140,6 +145,8 @@ const updateTotalFlowerMission = async(memberId) => {
         },
         include: { mission: true},
         });
+
+        const completedMissions = [];
     
         for (const flowerMission of flowerMissions){
             if(cntUniqueFlowers >= flowerMission.mission.targetValue){
@@ -147,8 +154,10 @@ const updateTotalFlowerMission = async(memberId) => {
                     where: { id: mission.id },
                     data: { completed: true },
                 });
+                completedMissions.push(flowerMission.id);
             }
         }
+        return completedMissions;
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '심은 꽃 미션 업데이트 중 오류가 발생하였습니다.');
     }
@@ -156,10 +165,38 @@ const updateTotalFlowerMission = async(memberId) => {
 
 
 
+//처음 가입한 사람의 경우 미션 초기 할당
+const setupMission= async(memberId) => {
+    try{
+        const missions = await prisma.mission.findMany({
+            select: {id: true}
+        });
+
+        if(missions.length === 0){
+            throw new CustomError(ErrorCodes.NotFound, '할당할 미션이 없습니다.');
+        }
+
+        //새로운 멤버에게 모든 미션 자동 할당
+        await prisma.memberMission.createMany({
+            data: missions.map(mission=> ({
+                memberId,
+                missionId: mission.id,
+                startDate: new Date(),
+                lastUpdated: new Date()
+            }))
+        });
+        console.log('미션 초기할당이 완료되었습니다');      //확인용
+    }catch(error){
+        console.error('미션 초기 생성 중 오류:', error);
+        throw new CustomError(ErrorCodes.InternalServerError, '미션 초기 생성 중 오류가 발생하였습니다.');
+    }
+};
+
 
 module.exports = {
     uncompletedMission,
     updateConsecutivePlantingMission,
     updateTotalFlowerMission,
     updateFocusTimeMission,
+    setupMission,
 }

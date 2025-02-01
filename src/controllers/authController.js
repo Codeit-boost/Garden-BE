@@ -1,6 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const kakaoAuthService = require('../services/kakaoAuthService');
-const missionService = require('../services/missionService');
+const missionService = require('../services/missionService');   //추가함
 
 // 카카오 로그인 URL 리다이렉트
 const kakaoLoginURL = (req, res) => {
@@ -35,10 +35,10 @@ const kakaoCallback = async (req, res) => {
   // 4. JWT 생성 및 반환
   const token = kakaoAuthService.generateJWT(member);
 
-  // 5. 연속미션 업데이트(일단 주석처리해놓음)
-  //const completedMissions = await missionService.updateConsecutivePlantingMission(member.id);
-  
-  res.status(200).json({ message: 'Login successful', token, user: member });
+  // 5. 연속미션 업데이트
+  const completedMissions = await missionService.updateConsecutivePlantingMission(member.id);   //추가함
+
+  res.status(200).json({ message: 'Login successful', token, user: member, completedMissions });
 };
 
 // 로그아웃

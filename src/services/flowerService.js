@@ -20,8 +20,33 @@ const findUnlockedFlowers = async(memberId) => {
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '잠금 해제된 꽃 목록 조회 중 오류가 발생했습니다.');
     }
+};
+
+
+//처음 가입한 사람의 경우 꽃 초기 할당
+const setupFlower = async(memberId) => {
+    try{
+        const flowers = await prisma.flower.findMany({
+            select: {id: true}
+        });
+        if(flowers.length === 0){
+            throw new CustomError(ErrorCodes.NotFound, '할당할 꽃이 없습니다.');
+        }
+        
+        //새로운 멤버에게 모든 꽃 자동 할당
+        await prisma.memberFlower.createMany({
+            data: flowers.map(flower=> ({
+                memberId,
+                flowerId: flower.id,
+            }))
+        });
+        console.log('꽃 초기할당이 완료되었습니다');          //확인용
+    }catch(error){
+        throw new CustomError(ErrorCodes.InternalServerError, '꽃 초기 생성 중 오류가 발생하였습니다.')
+    }
 }
 
 module.exports = {
     findUnlockedFlowers,
+    setupFlower,
 }

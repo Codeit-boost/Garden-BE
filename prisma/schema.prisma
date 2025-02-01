@@ -75,7 +75,7 @@ model Flower {
 model MemberFlower {
   memberId Int
   flowerId Int
-  unlocked Boolean? @default(false) // 잠금해제 여부
+  unlocked Boolean @default(false) // 잠금해제 여부
 
   member Member @relation(fields: [memberId], references: [id])
   flower Flower @relation(fields: [flowerId], references: [id])

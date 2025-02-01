@@ -41,14 +41,31 @@ const getTodayFlower = async (req, res, next) => {
 };
 
 
-// 라벤더 & 메리골드..존재X문제해결필요
 const searchFlower = async (req, res) => {
-  const name = req.query.name;
+  let name = req.query.name;
 
   if (!name) {
     throw new CustomError(ErrorCodes.BadRequest, '꽃 이름이 입력되지 않았습니다.');
   }
   
+  //api에 없는 꽃 추가
+  const addedFlowers = {
+    "라벤더":{
+      name: "라벤더",
+      language: "정절, 침묵"
+    },
+    "메리골드":{
+      name: "메리골드",
+      language: "반드시 오고야 말 행복"
+    }
+  };
+
+  //api에 존재 X 경우, 직접 응답 반환
+  if (addedFlowers[name]){
+    return res.json([addedFlowers[name]]);
+  }
+
+  //api에 존재
   try {
     const response = await axios.get(url_1, {
       params: {
