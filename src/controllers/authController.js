@@ -22,13 +22,18 @@ const kakaoCallback = async (req, res) => {
   // 2. 사용자 정보 요청
   const userData = await kakaoAuthService.fetchUserInfo(access_token);
   const kakaoUserId = String(userData.id);
+  const nickname = userData.properties.nickname;
+  const profileImage = userData.properties.profile_image;
+  const email = userData.kakao_account.email;
 
-  console.log('Kakao User Data:', userData);
+  //console.log('Kakao User Data:', userData);
 
   // 3. 사용자 데이터베이스 저장 또는 확인
   const member = await kakaoAuthService.findOrCreateMember(
     kakaoUserId,
-    userData.properties.nickname
+    nickname,
+    profileImage,
+    email
   );
 
   // 4. JWT 생성 및 반환

@@ -18,6 +18,8 @@ model Member {
   id       Int      @id @default(autoincrement())
   kakaoUserId   String?   @unique// 카카오 로그인 사용자 ID
   name     String   // 이름
+  img      String?  // 프로필 이미지 URL
+  email    String?  @unique // 이메일 (카카오에서 제공)
   alarm    Boolean? @default(false) // 알람
   mode     String?  // 모드
   sound    String?  // 소리
