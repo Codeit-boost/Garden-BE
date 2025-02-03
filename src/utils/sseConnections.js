@@ -31,3 +31,50 @@ const broadcast = (data) => {
 };
 
 module.exports = { addClient, removeClient, broadcast };
+
+
+
+/**
+ * 클라이언트 측 간략한 test 코드
+ */
+
+/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Focus Time Tracker</title>
+</head>
+<body>
+    <h1>🌱 집중 시간 실시간 트래커</h1>
+    <div id="focusTimeData">데이터 수신 대기 중...</div>
+
+    <script>
+        const eventSource = new EventSource("http://localhost:3000/api/focusTime/stream");
+
+        eventSource.onopen = () => {
+        console.log("✅ SSE 연결 성공");
+        };
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("📡 데이터 수신:", data);
+
+            document.getElementById("focusTimeData").innerText = 
+            `집중시간 id: ${data.id}, 목표 시간: ${data.targetTime}, 누적 시간: ${data.time}`;
+        };
+
+        eventSource.onerror = (error) => {
+            console.error("❌ 연결 오류:", error);
+            
+            // ✅ 오류 발생 시 서버에서 전송한 메시지 확인
+            if (error.currentTarget.readyState === EventSource.CLOSED) {
+                console.warn("🚫 SSE 연결이 종료되었습니다.");
+            } else {
+                console.warn("⚠️ 연결 상태:", error.currentTarget.readyState);
+            }
+        };
+    </script>
+</body>
+</html>
+*/
