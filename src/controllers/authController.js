@@ -9,7 +9,7 @@ const kakaoLoginURL = (req, res) => {
 };
 
 // 카카오 콜백 처리
-const kakaoCallback = asyncHandler(async (req, res) => {
+const kakaoCallback = async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
@@ -35,17 +35,17 @@ const kakaoCallback = asyncHandler(async (req, res) => {
   const token = kakaoAuthService.generateJWT(member);
   
   res.status(200).json({ message: 'Login successful', token, user: member });
-});
+};
 
 // 로그아웃
-const logout = asyncHandler(async (req, res) => {
+const logout = async (req, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
-});
+};
 
 // 인증된 사용자 정보 가져오기
-const getAuthenticatedUser = asyncHandler(async (req, res) => {
+const getAuthenticatedUser = async (req, res) => {
   res.status(200).json({ user: req.user });
-});
+};
 
 module.exports = {
   kakaoLoginURL,

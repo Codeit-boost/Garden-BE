@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+
 /**
  * 누적 시간이 목표 시간의 4분의 1 이상일 때마다 해당하는 단계의 꽃 이미지 url 반환
  */

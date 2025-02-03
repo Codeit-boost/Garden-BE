@@ -1,14 +1,18 @@
 const express = require("express");
 const statisticController = require("../controllers/statisticController");
 const asyncHandler = require("../utils/asyncHandler");
+const authMiddleware = require('../middlewares/authMiddleware');
+
 const router = express.Router();
 
-router.get("/statistic", asyncHandler(statisticController.getStatistic));
+router.get("", authMiddleware, asyncHandler(statisticController.getStatistic));
 /**
  * @swagger
  * /api/statistic:
  *   get:
  *     tags: [Statistic]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 통계 조회
  *     description: 일/주/월 단위로 사용자의 집중시간 통계를 조회합니다.
  *     parameters:

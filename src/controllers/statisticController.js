@@ -1,12 +1,20 @@
 const statisticService = require('../services/statisticService');
-const { StatisticQuery } = require('../struct/statisticStruct');
+const { StatisticsQuery } = require('../struct/statisticStruct');
 const s = require("superstruct");
 
 const getStatistic = async (req, res) => {
-    s.assert(req.query, StatisticQuery);
+    const memberId = req.user.id;
     
     const { type, year, month, day, week } = req.query;
-    const memberId = req.user.id;
+    
+    // 숫자로 변환 (값이 없을 경우 NaN 방지)
+    const yearNum = year ? parseInt(year, 10) : undefined;
+    const monthNum = month ? parseInt(month, 10) : undefined;
+    const dayNum = day ? parseInt(day, 10) : undefined;
+    const weekNum = week ? parseInt(week, 10) : undefined;
+
+    // Superstruct 검증
+    s.assert({ type, year: yearNum, month: monthNum, day: dayNum, week: weekNum }, StatisticsQuery);
 
     let startDate, endDate;
 

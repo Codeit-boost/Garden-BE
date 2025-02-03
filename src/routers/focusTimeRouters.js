@@ -1,5 +1,8 @@
 const express = require("express");
+const asyncHandler = require("../utils/asyncHandler");
 const focusTimeController = require("../controllers/focusTimeController");
+const authMiddleware = require('../middlewares/authMiddleware');
+
 const router = express.Router();
 
 /**
@@ -7,6 +10,8 @@ const router = express.Router();
  * /api/focusTime:
  *   post:
  *     tags: [FocusTime]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 집중시간 생성
  *     description: 목표 시간, 꽃, 카테고리 선택을 통해 새로운 집중시간을 생성합니다.
  *     requestBody:
@@ -27,7 +32,7 @@ const router = express.Router();
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-router.post("", focusTimeController.createFocusTime);
+router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime));
 
 
 router.get("/stream", focusTimeController.focusTimeSSE);
@@ -38,6 +43,8 @@ router.get("/stream", focusTimeController.focusTimeSSE);
  * /api/focusTime/{focusTimeId}:
  *   get:
  *     tags: [FocusTime]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 집중시간 세부 조회
  *     description: 4분할 시간마다 집중시간의 세부 정보를 조회합니다.
  *     parameters:
@@ -59,7 +66,7 @@ router.get("/stream", focusTimeController.focusTimeSSE);
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-router.get("/:focusTimeId", focusTimeController.focusTimeDetail);
+router.get("/:focusTimeId",authMiddleware, asyncHandler(focusTimeController.focusTimeDetail));
 
 
 /**
@@ -67,6 +74,8 @@ router.get("/:focusTimeId", focusTimeController.focusTimeDetail);
  * /api/focusTime/update:
  *   patch:
  *     tags: [FocusTime]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 집중시간 정보 업데이트
  *     description: 진행 중인 모든 집중시간 정보를 업데이트합니다. 집중시간이 목표 시간의 특정 비율에 도달하면 꽃 이미지를 변경하고, 누적 집중시간을 갱신합니다.
  *     responses:
@@ -91,7 +100,7 @@ router.get("/:focusTimeId", focusTimeController.focusTimeDetail);
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-router.patch("/update", focusTimeController.updateFocusTimeRealTime);
+router.patch("/update", authMiddleware, asyncHandler(focusTimeController.updateFocusTimeRealTime));
 
 
 /**
@@ -99,6 +108,8 @@ router.patch("/update", focusTimeController.updateFocusTimeRealTime);
  * /api/focusTime/{focusTimeId}/cancel:
  *   patch:
  *     tags: [FocusTime]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 타이머 모드 집중시간 포기
  *     description: 타이머 모드에서 집중시간을 포기하고 상태를 "WILTED"로 변경합니다.
  *     parameters:
@@ -124,7 +135,7 @@ router.patch("/update", focusTimeController.updateFocusTimeRealTime);
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-router.patch("/:focusTimeId/cancel", focusTimeController.cancelFocusTime);
+router.patch("/:focusTimeId/cancel", authMiddleware, asyncHandler(focusTimeController.cancelFocusTime));
 
 
 /**
@@ -132,6 +143,8 @@ router.patch("/:focusTimeId/cancel", focusTimeController.cancelFocusTime);
  * /api/focusTime/{focusTimeId}:
  *   patch:
  *     tags: [FocusTime]
+ *     security:
+ *       - bearerAuth: []
  *     summary: 집중시간 카테고리 수정
  *     description: 기존 집중시간의 카테고리 정보를 수정합니다.
  *     parameters:
@@ -157,7 +170,80 @@ router.patch("/:focusTimeId/cancel", focusTimeController.cancelFocusTime);
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-router.patch("/:focusTimeId", focusTimeController.updateFocusTimeCategory);
+router.patch("/:focusTimeId", authMiddleware, asyncHandler(focusTimeController.updateFocusTimeCategory));
 
 
 module.exports = router;
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateFocusTime:
+ *       type: object
+ *       required:
+ *         - target_time
+ *         - flower_id
+ *         - category
+ *       properties:
+ *         target_time:
+ *           type: string
+ *           description: 목표 시간 (ISO 8601 형식 혹은 "HH:mm:ss" 형식)
+ *           example: "01:30:00"
+ *         flower_id:
+ *           type: integer
+ *           description: 선택한 꽃 ID
+ *           example: 3
+ *         category:
+ *           type: string
+ *           description: 집중시간의 카테고리
+ *           example: "공부"
+ *
+ *     FocusTime:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: 집중시간 ID
+ *           example: 1
+ *         user_id:
+ *           type: integer
+ *           description: 집중시간을 생성한 사용자 ID
+ *           example: 42
+ *         target_time:
+ *           type: string
+ *           description: 목표 시간
+ *           example: "01:30:00"
+ *         flower_id:
+ *           type: integer
+ *           description: 선택한 꽃 ID
+ *           example: 3
+ *         category:
+ *           type: string
+ *           description: 집중시간의 카테고리
+ *           example: "공부"
+ *         status:
+ *           type: string
+ *           description: 현재 집중시간의 상태
+ *           example: "IN_PROGRESS"
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: 집중시간 생성 시간
+ *           example: "2025-01-31T12:00:00Z"
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           description: 집중시간 최근 업데이트 시간
+ *           example: "2025-01-31T12:30:00Z"
+ *
+ *     UpdateFocusTimeCategory:
+ *       type: object
+ *       required:
+ *         - category
+ *       properties:
+ *         category:
+ *           type: string
+ *           description: 수정할 카테고리
+ *           example: "운동"
+ */
