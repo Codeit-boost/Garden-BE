@@ -4,7 +4,7 @@ const { errorMiddleware } = require("../middlewares/errorMiddleware.js");
 const { calculateElapsedTime, convertSecondsToString, convertStringToSeconds } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage } = require("../utils/updateFlowerImage.js");
 const { updateState } = require("../utils/updateFocusTimeState.js");
-const prisma = new PrismaClient();
+const prisma = require("../middlewares/prismaMiddleware");
 
 /**
  * 집중시간 생성
@@ -188,7 +188,7 @@ const updateFocusTimeRealTime = async () => {
             return {
                 id: focusTime.id,
                 target_time: convertSecondsToString(focusTime.targetTime),
-                time: convertSecondsToString(elapsedTime),
+                time: convertSecondsToString(focusTime.time),
                 currentFlowerImage: currentFlowerImage, // 현재 단계 꽃 이미지 URL
                 state: newState
             };
