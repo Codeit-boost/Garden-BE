@@ -51,10 +51,12 @@ model MemberFriend {
   @@id([memberId, friendId])
 }
 
+
 /// 꽃 테이블
 model Flower {
   id         Int     @id @default(autoincrement())
   name       String  // 꽃 이름
+  language   String?  // 꽃말
   growthImg1 String? // 자라는 과정 1
   growthImg2 String? // 자라는 과정 2
   growthImg3 String? // 자라는 과정 3

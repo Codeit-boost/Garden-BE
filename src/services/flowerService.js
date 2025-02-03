@@ -43,7 +43,7 @@ const setupFlower = async(memberId) => {
 
         //처음 1개의 꽃은 unlock
         const firstFlower = await prisma.memberFlower.findFirst({
-            where: { memberId, flowerId: 1}
+            where: { memberId, flowerId: 1}             //1번째 꽃 id가 무조건 1이여야됨
         });
 
         if(firstFlower){

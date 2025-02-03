@@ -17,19 +17,29 @@ const generateMockMissions = async() => {
 
 // 꽃 생성 함수
 const generateMockFlowers = async() => {
-    const flowerTypes = ['장미', '해바라기', '메리골드', '초롱꽃', '코스모스', '수선화', '물망초', '능소화', '제비꽃','라벤더'];
-    
-    for(const flowerType of flowerTypes){
+    const flowers = [
+        {name: '장미', language: '사랑, 열정'},
+        {name: '해바라기', language: '희망, 기다림, 숭배'},
+        {name: '메리골드', language: '반드시 오고야 말 행복'},
+        {name: '초롱꽃', language: '인도, 침묵'},
+        {name: '코스모스', language: '소녀의 순결, 순정'},
+        {name: '수선화', language: '자존심, 고결, 신비'},
+        {name: '물망초', language: '날 잊지 마세요, 진실한 사랑'},
+        {name: '능소화', language: '명예, 영광'},
+        {name: '제비꽃', language: '순진한 사랑'},
+        {name: '라벤더', language: '정절, 침묵'},
+    ];
+
+    for(const flower of flowers){
         await prisma.flower.create({
             data:{
-                name: flowerType,
+                name: flower.name,
+                language: flower.language,
                 bloomImg: '활짝핀꽃이미지URL'
             },
         });
     }
 };
-
-//유저 생성 함수
 
 
 const generateMockData = async() => {

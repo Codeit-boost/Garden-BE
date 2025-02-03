@@ -41,6 +41,18 @@ const getTodayFlower = async (req, res, next) => {
 };
 
 
+const getUnlockedFlowers = async (req, res, next) => {
+  const memberId = req.user.id;
+
+  try{
+    const unlockedFlowers = await flowerService.findUnlockedFlowers(memberId);
+    res.json(unlockedFlowers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/*
 const searchFlower = async (req, res) => {
   let name = req.query.name;
 
@@ -110,21 +122,10 @@ const searchFlower = async (req, res) => {
     throw new CustomError(ErrorCodes.InternalServerError, '서버 오류가 발생했습니다.');
   }
 };
+*/
 
-
-const getUnlockedFlowers = async (req, res, next) => {
-  const memberId = req.user.id;
-
-  try{
-    const unlockedFlowers = await flowerService.findUnlockedFlowers(memberId);
-    res.json(unlockedFlowers);
-  } catch (error) {
-    next(error);
-  }
-};
 
 module.exports = {
   getTodayFlower,
-  searchFlower,
   getUnlockedFlowers,
 };
