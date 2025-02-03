@@ -40,8 +40,21 @@ const setupFlower = async(memberId) => {
                 flowerId: flower.id,
             }))
         });
+
+        //처음 1개의 꽃은 unlock
+        const firstFlower = await prisma.memberFlower.findFirst({
+            where: { memberId, flowerId: 1}
+        });
+
+        if(firstFlower){
+            await prisma.memberFlower.updateMany({
+                where: { memberId, flowerId: 1},
+                data: {unlocked: true},
+            });
+        }
         console.log('꽃 초기할당이 완료되었습니다');          //확인용
     }catch(error){
+        console.error(error);
         throw new CustomError(ErrorCodes.InternalServerError, '꽃 초기 생성 중 오류가 발생하였습니다.')
     }
 }
