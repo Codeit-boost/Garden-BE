@@ -119,9 +119,7 @@ const getFlowerAnalysis = async (memberId, startDate, endDate) => {
         if (!flowerStats[focus.flowerId]) {
             flowerStats[focus.flowerId] = {
                 name: focus.flower.name,
-                floriography: await prisma.floriography.findFirst({
-                    where: { flower: focus.flower.name }
-                }),
+                floriography: focus.flower.language,
                 totalCount: 0,
                 bloomedCount: 0,
                 wiltedCount: 0

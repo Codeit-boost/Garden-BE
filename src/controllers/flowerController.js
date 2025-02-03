@@ -41,13 +41,43 @@ const getTodayFlower = async (req, res, next) => {
 };
 
 
+const getUnlockedFlowers = async (req, res, next) => {
+  const memberId = req.user.id;
+
+  try{
+    const unlockedFlowers = await flowerService.findUnlockedFlowers(memberId);
+    res.json(unlockedFlowers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/*
 const searchFlower = async (req, res) => {
-  const name = req.query.name;
+  let name = req.query.name;
 
   if (!name) {
     throw new CustomError(ErrorCodes.BadRequest, '꽃 이름이 입력되지 않았습니다.');
   }
   
+  //api에 없는 꽃 추가
+  const addedFlowers = {
+    "라벤더":{
+      name: "라벤더",
+      language: "정절, 침묵"
+    },
+    "메리골드":{
+      name: "메리골드",
+      language: "반드시 오고야 말 행복"
+    }
+  };
+
+  //api에 존재 X 경우, 직접 응답 반환
+  if (addedFlowers[name]){
+    return res.json([addedFlowers[name]]);
+  }
+
+  //api에 존재
   try {
     const response = await axios.get(url_1, {
       params: {
@@ -70,31 +100,32 @@ const searchFlower = async (req, res) => {
       throw new CustomError(ErrorCodes.NotFound, '검색 결과가 존재하지 않음');
     }
 
-    const flowerInfo = items.map(item => ({
-      name: item.flowNm[0],
-      language: item.flowLang[0],
-    }));
+    let flowerInfo;
+    
+    if (name === '장미') {
+      // 장미인 경우 두 번째 결과만 반환
+      flowerInfo = [{
+        name: items[1]?.flowNm[0],
+        language: items[1]?.flowLang[0],
+      }];
+    } else {
+      // 그 외에는 첫 번째 결과만 반환
+      flowerInfo = [{
+        name: items[0].flowNm[0],
+        language: items[0].flowLang[0],
+      }];
+    }
 
     res.json(flowerInfo);
   } catch (error) {
+    console.error(error);
     throw new CustomError(ErrorCodes.InternalServerError, '서버 오류가 발생했습니다.');
   }
 };
+*/
 
-
-const getUnlockedFlowers = async (req, res, next) => {
-  const userId = req.user.id;
-
-  try{
-    const unlockedFlowers = await flowerService.findUnlockedFlowers(userId);
-    res.json(unlockedFlowers);
-  } catch (error) {
-    next(error);
-  }
-};
 
 module.exports = {
   getTodayFlower,
-  searchFlower,
   getUnlockedFlowers,
 };
