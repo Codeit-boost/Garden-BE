@@ -35,6 +35,9 @@ const router = express.Router();
 router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime));
 
 
+router.get("/stream", focusTimeController.focusTimeSSE);
+
+
 /**
  * @swagger
  * /api/focusTime/{focusTimeId}:

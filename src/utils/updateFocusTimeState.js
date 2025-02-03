@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../middlewares/prismaMiddleware");
 
 /**
  * 목표시간 1/4 단위(타이머) 또는 45분 단위(스톱워치)로 time 업데이트
@@ -32,6 +32,7 @@ const updateState = async (focusTime, elapsedTime) => {
         if (elapsedTime >= focusTime.targetTime) {
             newState = "BLOOMED";
             newTime = focusTime.targetTime;
+            shouldUpdate = true;
         }
     }
 
