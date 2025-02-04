@@ -28,9 +28,8 @@ const uncompletedMission = async(memberId) => {
 
 //연속 심기 미션 업데이트(로그인시..?)
 const updateConsecutivePlantingMission = async(memberId) => {
-    const today = new Date().setHours(0, 0, 0, 0);      //시간 자정으로 맞춤
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const today = new Date(new Date().setHours(0, 0, 0, 0));      //시간 자정으로 맞춤
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
   
     try{
         const missions = await prisma.memberMission.findMany({
@@ -49,8 +48,8 @@ const updateConsecutivePlantingMission = async(memberId) => {
             let reset = false;
     
             //날짜 계산 편하게 자정으로 다 맞춤
-            const lastUpdated = plantingMission.lastUpdated? new Date(plantingMission.lastUpdated).setHours(0, 0, 0, 0) : null;
-            const startDate = plantingMission.startDate? new Date(plantingMission.startDate).setHours(0, 0, 0, 0) : null;
+            const lastUpdated = plantingMission.lastUpdated? new Date(new Date(plantingMission.lastUpdated).setHours(0, 0, 0, 0)) : null;
+            const startDate = plantingMission.startDate? new Date(new Date(plantingMission.startDate).setHours(0, 0, 0, 0)) : null;
     
             //마지막 업데이트가 어제 이전이면 연속심기 초기화
             if(!lastUpdated || lastUpdated < yesterday ){
@@ -68,7 +67,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
             });
             }else{
             //연속심기 미션 완료한 경우
-            const days = Math.floor((today - startDate) / (24 * 60 * 60 * 1000)); //연속 일자
+            const days = startDate?Math.floor((today - startDate) / (24 * 60 * 60 * 1000)): 0; //연속 일자
             if(days >= plantingMission.mission.targetValue -1){
                 await prisma.memberMission.update({
                 where: {id: plantingMission.id},
