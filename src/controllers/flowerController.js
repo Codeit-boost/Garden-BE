@@ -1,9 +1,7 @@
 const axios = require('axios');
-const xml2js = require('xml2js');
 const { ErrorCodes, CustomError } = require("../utils/error");
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const { parseXml } = require('../utils/xmlParser');
+const flowerService = require('../services/flowerService');
 
 // REST URL
 const url_1 = 'https://apis.data.go.kr/1390804/NihhsTodayFlowerInfo01/selectTodayFlowerList01'; //상세1
@@ -14,47 +12,72 @@ const serviceKey = process.env.FLOWER_SERVICE_KEY;
 
 const currentDate = new Date();
  
-const getTodayFlower = async (req, res) => {
+const getTodayFlower = async (req, res, next) => {
   const fMonth = req.query.fMonth || (currentDate.getMonth()+1).toString();   //기본값: 현재 날짜
   const fDay = req.query.fDay || currentDate.getDate().toString();
   const queryParams = `?serviceKey=${encodeURIComponent(serviceKey)}&fMonth=${fMonth}&fDay=${fDay}`;
 
   try {
     const response = await axios.get(url_3 + queryParams);
+    const parsedData = await parseXml(response.data);
 
-    return new Promise((resolve, reject) => {
-      xml2js.parseString(response.data, (err, result) => {
-        if (err) {
-          return reject(new CustomError(ErrorCodes.InternalServerError, 'XML 파싱 오류'));
-        }
+    console.log('parsedData', parsedData);
 
-        //console.log('Parsed result:', JSON.stringify(result, null, 2));
-
-        if (!result.document || !result.document.root || !result.document.root[0] || !result.document.root[0].result) {
-          return reject(new CustomError(ErrorCodes.BadRequest, '예상치 못한 API 응답 구조'));
-        }
-
-        const flowerInfo = result.document.root[0].result[0];
-        const flowerData = {
-          name: flowerInfo.flowNm[0], 
-          language: flowerInfo.flowLang[0], //꽃말
-          imageUrl1: flowerInfo.imgUrl1[0],
-        };
-
-        resolve(flowerData);
-      });
-    });
+    //Xml 파싱 결과 검증
+    if(!parsedData.document?.root?.[0]?.result){
+      throw new CustomError(ErrorCodes.BadRequest, '예상치 못한 API 응답 구조');
+    }
+  
+    const flowerInfo = parsedData.document.root[0].result[0];
+    const todayFlower = {
+      name: flowerInfo.flowNm[0], 
+      language: flowerInfo.flowLang[0], //꽃말
+      //imageUrl: flowerInfo.imgUrl1[0],
+    };
+    res.json(todayFlower);
   } catch (error) {
-    throw new CustomError(ErrorCodes.InternalServerError, '서버 오류가 발생했습니다.');
+    next(error);
   }
 };
 
 
-const searchFlower = async (name) => {
+const getUnlockedFlowers = async (req, res, next) => {
+  const memberId = req.user.id;
+
+  try{
+    const unlockedFlowers = await flowerService.findUnlockedFlowers(memberId);
+    res.json(unlockedFlowers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/*
+const searchFlower = async (req, res) => {
+  let name = req.query.name;
+
   if (!name) {
-    throw new CustomError(ErrorCodes.BadRequest, '꽃 이름을 입력해주세요.');
+    throw new CustomError(ErrorCodes.BadRequest, '꽃 이름이 입력되지 않았습니다.');
   }
   
+  //api에 없는 꽃 추가
+  const addedFlowers = {
+    "라벤더":{
+      name: "라벤더",
+      language: "정절, 침묵"
+    },
+    "메리골드":{
+      name: "메리골드",
+      language: "반드시 오고야 말 행복"
+    }
+  };
+
+  //api에 존재 X 경우, 직접 응답 반환
+  if (addedFlowers[name]){
+    return res.json([addedFlowers[name]]);
+  }
+
+  //api에 존재
   try {
     const response = await axios.get(url_1, {
       params: {
@@ -64,66 +87,45 @@ const searchFlower = async (name) => {
       },
     });
 
-    console.log('API 응답 데이터:', response.data);
+    //console.log('API 응답 데이터:', response.data);
+    const parsedData = await parseXml(response.data);
 
-    return new Promise((resolve, reject) => {
-      xml2js.parseString(response.data, (err, result) => {
-        if (err) {
-          return reject(new CustomError(ErrorCodes.InternalServerError, 'XML 파싱 오류'));
-        }
+    if(!parsedData.document?.root?.[0]){
+      throw new CustomError(ErrorCodes.InternalServerError, '예상치 못한 API 응답 구조');
+    }
+    
+    const items = parsedData.document.root[0].result;
 
-        if (!result.document || !result.document.root || !result.document.root[0]) {
-          return reject(new CustomError(ErrorCodes.InternalServerError, '예상치 못한 API 응답 구조'));
-        }
+    if(!items || items.length === 0){
+      throw new CustomError(ErrorCodes.NotFound, '검색 결과가 존재하지 않음');
+    }
 
-        const root = result.document.root[0];
-        const items = root.result;
+    let flowerInfo;
+    
+    if (name === '장미') {
+      // 장미인 경우 두 번째 결과만 반환
+      flowerInfo = [{
+        name: items[1]?.flowNm[0],
+        language: items[1]?.flowLang[0],
+      }];
+    } else {
+      // 그 외에는 첫 번째 결과만 반환
+      flowerInfo = [{
+        name: items[0].flowNm[0],
+        language: items[0].flowLang[0],
+      }];
+    }
 
-        if (!items || items.length === 0) {
-          return reject(new CustomError(ErrorCodes.NotFound, '검색결과가 없음'));
-        }
-
-        const flowerInfo = items.map(item => ({
-          name: item.flowNm[0],
-          language: item.flowLang[0],
-          imageUrl1: item.imgUrl1[0],
-          imageUrl2: item.imgUrl2[0],
-          imageUrl3: item.imgUrl3[0],
-        }));
-
-        resolve(flowerInfo);
-      });
-    });
+    res.json(flowerInfo);
   } catch (error) {
+    console.error(error);
     throw new CustomError(ErrorCodes.InternalServerError, '서버 오류가 발생했습니다.');
   }
 };
+*/
 
-const getUnlockedFlowers = async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const unlockedFlowers = await prisma.memberFlower.findMany({
-      where: { 
-        memberId: Number(userId),
-        unlocked: true 
-      },
-      include: {
-        flower: true  // 꽃 상세 정보 포함
-      }
-    });
-
-    res.json(unlockedFlowers);
-  } catch (error) {
-    throw new CustomError(
-      ErrorCodes.InternalServerError, 
-      '잠금 해제된 꽃 목록 조회 중 오류가 발생했습니다.'
-    );
-  }
-};
 
 module.exports = {
   getTodayFlower,
-  searchFlower,
   getUnlockedFlowers,
 };

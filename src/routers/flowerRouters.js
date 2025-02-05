@@ -1,7 +1,7 @@
 const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const router = express.Router();
-const { getTodayFlower, searchFlower, getUnlockedFlowers } = require("../controllers/flowerController");
+const { getTodayFlower, getUnlockedFlowers } = require("../controllers/flowerController");
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.use(express.json());
@@ -10,10 +10,7 @@ router.use(express.urlencoded({ extended: true }));
 
 //오늘의 꽃 & 꽃말
 // GET /api/flower/todayFlower
-router.get('/todayFlower', asyncHandler(async (req, res) => {
-  const flowerData = await getTodayFlower(req, res);
-  res.json(flowerData);
-}));
+router.get('/todayFlower', asyncHandler(getTodayFlower));
 
 /**
  * @swagger
@@ -46,60 +43,6 @@ router.get('/todayFlower', asyncHandler(async (req, res) => {
  *                 language:
  *                   type: string
  *                   example: "사랑"
- *                 imageUrl1:
- *                   type: string
- *                   example: "https://example.com/rose.jpg"
- *       500:
- *         description: "서버 오류가 발생했습니다."
- */
-
-
-//이름으로 꽃 찾기 -- 나의 정원에 있는 꽃말 때문에 혹시 몰라서 만들어 놓음
-// GET /api/flower/searchFlower
-router.get('/search-flower', authMiddleware, asyncHandler(searchFlower));
-
-/**`
- * @swagger
- * /api/flower/search-flower:
- *   get:
- *     summary: "꽃 이름으로 검색"
- *     tags: [Flower]
- *     parameters:
- *       - in: query
- *         name: name
- *         required: true
- *         schema:
- *           type: string
- *         description: "검색할 꽃 이름"
- *     responses:
- *       200:
- *         description: "성공적으로 꽃 정보를 반환합니다."
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
- *                     example: "해바라기"
- *                   language:
- *                     type: string
- *                     example: "동경, 숭배"
- *                   imageUrl1:
- *                     type: string
- *                     example: "https://example.com/sunflower1.jpg"
- *                   imageUrl2:
- *                     type: string
- *                     example: "https://example.com/sunflower2.jpg"
- *                   imageUrl3:
- *                     type: string
- *                     example: "https://example.com/sunflower3.jpg"
- *       400:
- *         description: "꽃 이름을 입력해주세요."
- *       404:
- *         description: "검색 결과가 없습니다."
  *       500:
  *         description: "서버 오류가 발생했습니다."
  */

@@ -1,15 +1,22 @@
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { ErrorCodes, CustomError } = require('../utils/error');
+const missionService = require('../services/missionService');   //추가함
+const flowerService = require('../services/flowerService');     //추가함
 
 const KAKAO_CLIENT_ID = process.env.KAKAO_CLIENT_ID;
 const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
+const FRONT_DOMAIN = process.env.FRONT_DOMAIN;
 
 const prisma = new PrismaClient();
 
 const getKakaoAuthURL = () => {
   return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}`;
+};
+
+const getFrontRedirectURL = (token) => {
+  return `${FRONT_DOMAIN}/home?token=${token}`;
 };
 
 const fetchAccessToken = async (code) => {
@@ -54,6 +61,8 @@ const findOrCreateMember = async (kakaoUserId, nickname) => {
         kakaoUserId,
       },
     });
+    await missionService.setupMission(member.id);   // 미션 초기할당
+    await flowerService.setupFlower(member.id);     // 꽃 초기할당
   }
 
   return member;
@@ -69,6 +78,7 @@ const generateJWT = (member) => {
 
 module.exports = {
   getKakaoAuthURL,
+  getFrontRedirectURL,
   fetchAccessToken,
   fetchUserInfo,
   findOrCreateMember,

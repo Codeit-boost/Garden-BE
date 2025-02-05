@@ -1,11 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../middlewares/prismaMiddleware");
+
+const missionService = require('../services/missionService');
 
 /**
  * 목표시간 1/4 단위(타이머) 또는 45분 단위(스톱워치)로 time 업데이트
  * 누적 집중시간이 목표 집중시간을 달성하면 상태를 BLOOMED로 변경
  */
-const updateState = async (focusTime, elapsedTime) => {
+const updateState = async (memberId, focusTime, elapsedTime) => {
 
     let newState = focusTime.state;
     let shouldUpdate = false;
@@ -32,6 +34,12 @@ const updateState = async (focusTime, elapsedTime) => {
         if (elapsedTime >= focusTime.targetTime) {
             newState = "BLOOMED";
             newTime = focusTime.targetTime;
+
+            //미션 업데이트 ---> 추가함✅
+            await missionService.updateFocusTimeMission(memberId, newTime);
+            await missionService.updateTotalFlowerMission(memberId);
+
+            shouldUpdate = true;
         }
     }
 
@@ -51,6 +59,7 @@ const updateState = async (focusTime, elapsedTime) => {
             newState = "BLOOMED";
             updatedTime = maxTime;
             shouldUpdate = true;
+            
         }
     }
 

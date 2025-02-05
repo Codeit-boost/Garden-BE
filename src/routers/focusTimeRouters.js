@@ -34,6 +34,34 @@ const router = express.Router();
  */
 router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime));
 
+/**
+ * @swagger
+ * /api/focusTime/stream:
+ *   get:
+ *     tags: [FocusTime]
+ *     summary: 집중시간 실시간 업데이트 스트림
+ *     description: |
+ *       클라이언트는 이 엔드포인트에 연결하여 실시간 집중시간 업데이트를 받을 수 있습니다.
+ *       서버는 집중시간의 상태가 변경될 때 SSE(Server-Sent Events) 형식으로 데이터를 푸시합니다.
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - text/event-stream
+ *     responses:
+ *       200:
+ *         description: SSE 연결이 성공적으로 설정되었습니다.
+ *         content:
+ *           text/event-stream:
+ *             schema:
+ *               type: string
+ *               example: "data: {\"id\": 1, \"time\": \"00:15:00\", \"state\": \"IN_PROGRESS\"}\n\n"
+ *       401:
+ *         description: 인증이 필요합니다.
+ *       500:
+ *         description: 서버 오류가 발생했습니다.
+ */
+router.get("/stream",authMiddleware,  asyncHandler(focusTimeController.focusTimeSSE));
+
 
 /**
  * @swagger
