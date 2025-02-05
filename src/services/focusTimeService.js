@@ -160,7 +160,7 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
 /**
  * 실시간 집중시간 정보 업데이트
  */
-const updateFocusTimeRealTime = async () => {
+const updateFocusTimeRealTime = async (memberId) => {
     const focusTimes = await prisma.focusTime.findMany({
         where: { state: 'IN_PROGRESS' },
         include: { flower: true }
@@ -175,6 +175,7 @@ const updateFocusTimeRealTime = async () => {
             );
             
             const newState = await updateState(
+                memberId,
                 focusTime,
                 elapsedTime
             );

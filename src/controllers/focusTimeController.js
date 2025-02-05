@@ -57,7 +57,9 @@ const cancelFocusTime = async (req, res) => {
  * 실시간 집중시간 정보 업데이트
  */
 const updateFocusTimeRealTime = async (req, res, next) => {
-  
+
+    const memberId = req.user.id;   //미션업데이트용 사용자 id 받기  ---> 추가함✅
+
     // 요청 데이터 확인
     if (req.body && Object.keys(req.body).length > 0) {
         return res.status(400).json({
@@ -65,7 +67,7 @@ const updateFocusTimeRealTime = async (req, res, next) => {
         });
     }
 
-    const updates = await focusTimeService.updateFocusTimeRealTime();
+    const updates = await focusTimeService.updateFocusTimeRealTime(memberId);
 
     if (updates.length === 0) {
         return res.status(200).json({ message: "변경된 데이터가 없습니다."});
