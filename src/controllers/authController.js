@@ -36,9 +36,13 @@ const kakaoCallback = async (req, res) => {
   const token = kakaoAuthService.generateJWT(member);
 
   // 5. 연속미션 업데이트
-  const completedMissions = await missionService.updateConsecutivePlantingMission(member.id);   //추가함
+  missionService.updateConsecutivePlantingMission(member.id);  
 
-  res.status(200).json({ message: 'Login successful', token, user: member, completedMissions });
+  // 6. 리다리렉트 url
+  const redirect_uri = kakaoAuthService.getFrontRedirectURL(token);
+
+  // 클라이언트의 특정 페이지로 토큰을 전달하며 리다이렉트
+  res.redirect(redirect_uri);
 };
 
 // 로그아웃
