@@ -44,7 +44,7 @@ const generateMockFlowers = async() => {
             data:{
                 name: flower.name,
                 language: flower.language,
-                bloomImg: '활짝핀꽃이미지URL'
+                FlowerImg: '활짝핀꽃이미지URL'
             },
         });
     }
