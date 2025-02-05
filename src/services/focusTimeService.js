@@ -5,6 +5,8 @@ const { updateState } = require("../utils/updateFocusTimeState.js");
 const { ErrorCodes, CustomError } = require('../utils/error');
 const sse = require("../sse/sse.js");
 
+const STOPWATCH = process.env.STOPWATCH;
+
 const prisma = new PrismaClient();
 
 // 서버가 다운 됐을떄 실행중이였던 모든 집중시간 일괄 시듦 상태로 업데이트
@@ -78,7 +80,7 @@ const createFocusTime = async (memberId, focusTimeData) => {
                 FlowerName: focusTime.flower.name,
                 member_id: focusTime.memberId,
                 createdAt: focusTime.createdAt,
-                time: now
+                now: now
             },
             include: {
                 member: focusTime.member
@@ -202,11 +204,15 @@ const broadcastNowFocusTime =  async (memberId) => {
     
     const time = Math.floor((now - focusTime.createdAt.getTime()) / 1000);
 
+    let quarter; 
+
     // 몇번쨰 이미지 인지 체크
-    const quarter = Math.floor((time / focusTime.targetTime) * 4) + 1;
-
-    console.log(quarter)
-
+    if(focusTime.targetTime == 0){
+      quarter =  Math.floor(time / parseInt(STOPWATCH,10)) 
+    }else{
+      quarter = Math.floor((time / focusTime.targetTime) * 4) + 1;
+    }
+    
     const data = {
       id: focusTime.id,
       category: focusTime.category,

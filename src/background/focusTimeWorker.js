@@ -5,6 +5,8 @@ const sse = require("../sse/sse.js");
 const { convertStringToSeconds, convertSecondsToString } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage } = require("../utils/updateFlowerImage.js");
 
+const STOPWATCH = process.env.STOPWATCH;
+
 const redisClient = redis.createClient({
   url: process.env.REDIS_URL
 });
@@ -16,7 +18,7 @@ const SCHEDULE_KEY = 'focusTime:timers';
 // 집중 시간 생성시 레디스에 저장
 const scheduleFocusTimeEvent = async (memberId, data, quarter) => {
   if(convertStringToSeconds(data.target_time) == 0) { // 스탑워치
-    const quarterInterval = 300;
+    const quarterInterval = parseInt(STOPWATCH, 10);
     const eventTimestamp =  Math.floor(new Date(data.createdAt) / 1000) + quarterInterval * quarter; // quarterInterval 후에 실행
     
     const eventData = {memberId, data, quarter};
@@ -112,6 +114,7 @@ setInterval(async () => {
           await scheduleFocusTimeEvent(event.memberId, data, event.quarter + 1);
         }
       }else{ // sse에 클라이언트가 없다면 종료 또는 취소
+        console.log("sse미연결로 삭제")
         focusTimeService.endFocusTimeById(event.data.id);
       }
     }

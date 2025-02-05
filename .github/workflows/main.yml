@@ -66,4 +66,5 @@ jobs:
               -e FLOWER_SERVICE_KEY=${{ secrets.FLOWER_SERVICE_KEY }} \
               -e REDIS_URL=redis://my-redis:6379 \
               -e FRONT_DOMAIN=${{ secrets.FRONT_DOMAIN }}
+              -e STOPWATCH=${{ secrets.STOPWATCH }}
               $IMAGE_NAME:latest
