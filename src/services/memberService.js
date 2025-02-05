@@ -46,6 +46,17 @@ const getMemberInfo = async (memberId) => {
     },
   });
 
+  const wiltedCount = await prisma.focusTime.count({
+    where: { memberId: memberId, state: "WILTED" }
+  });
+  
+  const bloomedCount = await prisma.focusTime.count({
+    where: { memberId: memberId, state: "BLOOMED" }
+  });
+
+  member.wiltedCount = wiltedCount;
+  member.bloomedCount = bloomedCount;
+
   if (!member) {
     throw new CustomError(ErrorCodes.NotFound, '해당 회원 정보가 없습니다.');
   }
@@ -53,6 +64,8 @@ const getMemberInfo = async (memberId) => {
   // 현재 회원의 집중시간 총합 계산 (FocusTime의 time 필드 합)
   const currentTotalTime = member.focusTimes.reduce((sum, ft) => sum + ft.time, 0);
 
+  member.currentTotalTime = currentTotalTime;
+  
   // 다른 회원들의 집중시간 총합 중에서, 현재 회원보다 큰 값들 중 최소값을 찾는 SQL 쿼리
   const result = await prisma.$queryRaw`
     SELECT "memberId", SUM("time") AS "total_time"
