@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 # package.json 복사 및 의존성 설치
 COPY package.json ./
 
-RUN npm cache clean npm install
+RUN npm install
 
 # Prisma CLI 버전 확인
 RUN npx prisma --version
