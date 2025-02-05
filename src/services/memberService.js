@@ -64,7 +64,7 @@ const getMemberInfo = async (memberId) => {
   `;
 
   // 쿼리 결과가 있을 경우 해당 집중시간 총합을, 없으면 null로 추가
-  member.nextTotalTime = (result[0]?.total_time - currentTotalTime) || 0;
+  member.nextTotalTime = (result[0]?.total_time - currentTotalTime) || null;
 
   return member;
 };
