@@ -57,11 +57,7 @@ model Flower {
   id         Int     @id @default(autoincrement())
   name       String  // 꽃 이름
   language   String?  // 꽃말
-  //growthImg1 String? // 자라는 과정 1
-  //growthImg2 String? // 자라는 과정 2
-  //growthImg3 String? // 자라는 과정 3
-  bloomImg   String? // 활짝 폈을 때
-  //witherImg  String? // 시듦
+  FlowerImg   String? // 활짝 폈을 때
 
   // Member와 다대다(M:N) -> MemberFlower 이용
   members MemberFlower[]
