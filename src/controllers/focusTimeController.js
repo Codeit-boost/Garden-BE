@@ -2,7 +2,7 @@ const focusTimeService = require("../services/focusTimeService.js");
 const s = require("superstruct");
 const { CreateFocusTime, UpdateFocusTimeCategory } = require("../struct/focusTimeStruct.js");
 const sse = require("../sse/sse.js");
-const { scheduleFocusTimeEvent } = require("../background/focusTime")
+const { scheduleFocusTimeEvent ,removeEventsByMemberId} = require("../background/focusTimeWorker")
 
 /**
  * 집중시간 생성
@@ -50,11 +50,20 @@ const updateFocusTimeCategory = async (req, res) => {
  */
 const cancelFocusTime = async (req, res) => {
     const { focusTimeId } = req.params;
-    const canceledFocusTime = await focusTimeService.cancelFocusTimeById(focusTimeId);
-    res.status(200).json(canceledFocusTime);
+    removeEventsByMemberId(req.user.id);
+    const endFocusTime = await focusTimeService.endFocusTimeById(focusTimeId);
+    res.status(200).json(endFocusTime);
 };
 
-
+/**
+ * 스탑워치 모드 집중시간 종료
+ */
+const endFocusTime = async (req, res) => {
+    const { focusTimeId } = req.params;
+    removeEventsByMemberId(req.user.id);
+    const endFocusTime = await focusTimeService.endFocusTimeById(focusTimeId);
+    res.status(200).json(endFocusTime);
+};
 // /**
 //  * 실시간 집중시간 정보 업데이트
 //  */
@@ -98,5 +107,6 @@ module.exports = {
     focusTimeDetail,
     updateFocusTimeCategory,
     cancelFocusTime,
+    endFocusTime,
     focusTimeSSE
 };

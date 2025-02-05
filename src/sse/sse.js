@@ -7,9 +7,7 @@ setInterval(() => {
     clients.forEach(client => { 
         try {
             client.sseClient.write(":\n\n"); // SSE 연결 유지 (Ping 역할)
-            console.log(`✅ 데이터 전송 성공 (ID: ${id})`);
         } catch (error) {
-            console.log(`❌ 데이터 전송 실패 (ID: ${id}):`, error);
             removeClient(client.sseClient); // ❗ 오류 발생 시 해당 클라이언트만 제거
         }
     });
@@ -25,11 +23,11 @@ const addClient = (id, res) => {
     console.log("📡 클라이언트와 SSE 연결이 설정되었습니다.");
 
     clients.push({id: id, sseClient: res});
-    console.log("✅ 클라이언트 연결됨. 현재 연결된 클라이언트:", clients);
+    console.log("✅ 클라이언트 연결됨. 현재 연결된 클라이언트:", clients.length);
     
     // 클라이언트가 연결을 종료할 경우 (브라우저 종료, 네트워크 끊김 등)
     res.on("close", () => {
-        console.log(`🚫 클라이언트(ID: ${id}) 연결 종료`);
+        console.log("클라이언트 연결 해제됌")
         removeClient(res);
     });
 };
@@ -48,17 +46,17 @@ const broadcast = (id, data) => {
     const targetClients = clients.filter(client => client.id === id);
 
     if (targetClients.length == 0) {
-        console.log(`⚠️ 데이터 전송 실패: ID ${id}에 해당하는 클라이언트가 없습니다.`);
+        console.log(`데이터 전송 실패: ID ${id}에 해당하는 클라이언트가 없습니다.`);
         return false;
     }
 
     targetClients.forEach(client => {
         try {
             client.sseClient.write(`data: ${JSON.stringify(data)}\n\n`);
-            console.log(`✅ 데이터 전송 성공 (ID: ${id})`);
+            console.log(`데이터 전송 성공 (ID: ${id})`);
         } catch (error) {
-            console.log(`❌ 데이터 전송 실패 (ID: ${id}):`, error);
-            removeClient(client.sseClient); // ❗ 오류 발생 시 해당 클라이언트만 제거
+            console.log(`데이터 전송 실패 (ID: ${id}):`, error);
+            removeClient(client.sseClient); // 오류 발생 시 해당 클라이언트만 제거
         }
     });
     return true;
