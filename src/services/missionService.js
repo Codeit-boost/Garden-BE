@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { CustomError, ErrorCodes } = require('../utils/error');
+const calculateTime = require('../utils/calculateTime');
 
 const prisma = new PrismaClient();
 
@@ -105,6 +106,8 @@ const updateConsecutivePlantingMission = async(memberId) => {
 
 //집중 시간 미션(집중 시간 저장 시)
 const updateFocusTimeMission = async(memberId, focusTime) => {
+    const focusedTime = calculateTime.convertTimeToHours(focusTime);
+    
     try{
         const missions = await prisma.memberMission.findMany({
         where: {
@@ -118,17 +121,17 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
         const completedMissions = [];
 
         for (const focusMission of missions){
-            if(focusTime >= focusMission.mission.targetValue){
+            if(focusedTime >= focusMission.mission.targetValue){
                 await prisma.memberMission.update({
                     where: {id: focusMission.id},
                     data: {completed: true},
                 });
                 completedMissions.push({
-                    missionId: plantingMission.id,
-                    flower: plantingMission.mission.flower?
+                    missionId: focusMission.id,
+                    flower: focusMission.mission.flower?
                     {
-                        name: plantingMission.mission.flower.name, 
-                        FlowerImg: plantingMission.mission.flower.FlowerImg
+                        name: focusMission.mission.flower.name, 
+                        FlowerImg: focusMission.mission.flower.FlowerImg
                     } : null
                 });
             }
@@ -164,15 +167,15 @@ const updateTotalFlowerMission = async(memberId) => {
         for (const flowerMission of flowerMissions){
             if(cntUniqueFlowers >= flowerMission.mission.targetValue){
                 await prisma.memberMission.update({
-                    where: { id: mission.id },
+                    where: { id: flowerMission.id },
                     data: { completed: true },
                 });
                 completedMissions.push({
-                    missionId: plantingMission.id,
-                    flower: plantingMission.mission.flower?
+                    missionId: flowerMission.id,
+                    flower: flowerMission.mission.flower?
                     {
-                        name: plantingMission.mission.flower.name, 
-                        FlowerImg: plantingMission.mission.flower.FlowerImg
+                        name: flowerMission.mission.flower.name, 
+                        FlowerImg: flowerMission.mission.flower.FlowerImg
                     } : null
                 });
             }
