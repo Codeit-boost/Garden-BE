@@ -4,6 +4,7 @@ const { getUpdatedFlowerImage,getWitherImg } = require("../utils/updateFlowerIma
 const { updateState } = require("../utils/updateFocusTimeState.js");
 const { ErrorCodes, CustomError } = require('../utils/error');
 const sse = require("../sse/sse.js");
+const missionService = require('../services/missionService');
 
 const STOPWATCH = process.env.STOPWATCH;
 
@@ -232,7 +233,7 @@ const broadcastNowFocusTime =  async (memberId) => {
 /**
  * 집중시간 종료
  */
-const endFocusTimeById = async (focusTimeId) => {
+const endFocusTimeById = async (memberId, focusTimeId) => {
     const parsedFocusTimeId = parseInt(focusTimeId, 10);
 
     // focusTimeId에 해당하는 집중시간 객체 탐색
@@ -298,6 +299,10 @@ const endFocusTimeById = async (focusTimeId) => {
               member: true
           }
       });
+
+      //미션 업데이트 
+      const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId, canceledFocusTime.time);
+      const completedFlowerMissions = await missionService.updateTotalFlowerMission(memberId);
   
       return {
           data: {
@@ -311,6 +316,10 @@ const endFocusTimeById = async (focusTimeId) => {
               createdAt: canceledFocusTime.createdAt,
               state: canceledFocusTime.state
           },
+          missions: {
+            focusTimeMissions: completedFocusTimeMissions,
+            flowerMissions: completedFlowerMissions,
+          },
           include: {
               flower: canceledFocusTime.flower,
               member: canceledFocusTime.member
@@ -322,7 +331,7 @@ const endFocusTimeById = async (focusTimeId) => {
 };
 
 // 타이머 정상 종료
-const completeFocusTimeById = async (focusTimeId) => {
+const completeFocusTimeById = async (memberId, focusTimeId) => {
   // focusTimeId에 해당하는 집중시간 객체 탐색
   const focusTime = await prisma.focusTime.findUnique({
     where: { id: focusTimeId },
@@ -340,11 +349,22 @@ const completeFocusTimeById = async (focusTimeId) => {
         time: focusTime.targetTime 
       },
     });
-    return updatedFocusTime;
+
+    //미션 업데이트 
+    const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId, updatedFocusTime.time);
+    const completedFlowerMissions = await missionService.updateTotalFlowerMission(memberId);
+    
+    return {
+      data: updatedFocusTime,
+      missions: {
+        focusTimeMissions: completedFocusTimeMissions,
+        flowerMissions: completedFlowerMissions,
+      }
+    };
   }else{
     return null;
   }
-}
+};
 
 module.exports = {
     createFocusTime,
