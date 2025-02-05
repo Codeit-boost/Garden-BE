@@ -81,7 +81,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
                     flower: plantingMission.mission.flower?
                     {
                         name: plantingMission.mission.flower.name, 
-                        bloomImg: plantingMission.mission.flower.bloomImg
+                        FlowerImg: plantingMission.mission.flower.FlowerImg
                     } : null      //해당 미션으로 깨지는 꽃이 없는 경우 'null'반환
                 });
             }else{
@@ -128,7 +128,7 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
                     flower: plantingMission.mission.flower?
                     {
                         name: plantingMission.mission.flower.name, 
-                        bloomImg: plantingMission.mission.flower.bloomImg
+                        FlowerImg: plantingMission.mission.flower.FlowerImg
                     } : null
                 });
             }
@@ -172,7 +172,7 @@ const updateTotalFlowerMission = async(memberId) => {
                     flower: plantingMission.mission.flower?
                     {
                         name: plantingMission.mission.flower.name, 
-                        bloomImg: plantingMission.mission.flower.bloomImg
+                        FlowerImg: plantingMission.mission.flower.FlowerImg
                     } : null
                 });
             }
