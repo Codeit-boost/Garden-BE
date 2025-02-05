@@ -47,8 +47,17 @@ const convertStringToSeconds = (time) => {
 };
 
 
+/**
+ * 전체 시간에서 시간만 반환하는 함수
+ */
+const convertTimeToHours = (time) => {
+    const hours = Math.floor(time / 3600);
+    return hours;
+};
+
 module.exports = {
     calculateElapsedTime,
     convertSecondsToString,
-    convertStringToSeconds
+    convertStringToSeconds,
+    convertTimeToHours
 };

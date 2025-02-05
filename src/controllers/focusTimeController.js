@@ -49,9 +49,10 @@ const updateFocusTimeCategory = async (req, res) => {
  * 타이머 모드 집중시간 포기
  */
 const cancelFocusTime = async (req, res) => {
+    const memberId = req.user.id;
     const { focusTimeId } = req.params;
-    removeEventsByMemberId(req.user.id);
-    const endFocusTime = await focusTimeService.endFocusTimeById(focusTimeId);
+    removeEventsByMemberId(memberId);
+    const endFocusTime = await focusTimeService.endFocusTimeById(memberId, focusTimeId);
     res.status(200).json(endFocusTime);
 };
 
@@ -59,9 +60,10 @@ const cancelFocusTime = async (req, res) => {
  * 스탑워치 모드 집중시간 종료
  */
 const endFocusTime = async (req, res) => {
+    const memberId = req.user.id;
     const { focusTimeId } = req.params;
-    removeEventsByMemberId(req.user.id);
-    const endFocusTime = await focusTimeService.endFocusTimeById(focusTimeId);
+    removeEventsByMemberId(memberId);
+    const endFocusTime = await focusTimeService.endFocusTimeById(memberId, focusTimeId);
     res.status(200).json(endFocusTime);
 };
 // /**
