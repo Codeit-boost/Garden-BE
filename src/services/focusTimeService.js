@@ -151,15 +151,13 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
 //         where: { state: 'IN_PROGRESS' },
 //         include: { flower: true }
 //     });
-
 //     const updates = await Promise.all(
 //         focusTimes.map(async (focusTime) => {
-            
 //             const elapsedTime = calculateElapsedTime(
 //                 focusTime.createdAt,
 //                 focusTime.targetTime
 //             );
-            
+           
 //             const newState = await updateState(
 //                 focusTime,
 //                 elapsedTime
