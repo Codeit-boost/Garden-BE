@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../middlewares/prismaMiddleware");
 
 const missionService = require('../services/missionService');
 
@@ -35,9 +35,11 @@ const updateState = async (memberId, focusTime, elapsedTime) => {
             newState = "BLOOMED";
             newTime = focusTime.targetTime;
 
-            //미션 업데이트
+            //미션 업데이트 ---> 추가함✅
             await missionService.updateFocusTimeMission(memberId, newTime);
             await missionService.updateTotalFlowerMission(memberId);
+
+            shouldUpdate = true;
         }
     }
 
