@@ -39,7 +39,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
                 NOT: { lastUpdated: { gte: new Date(today) } },   //오늘 이미 갱신된 미션 제외
                 completed: false,
             },
-            include: {mission: true},
+            include: {mission: { include: { flower: true } } },
         });
 
         const completedMissions = [];
@@ -76,7 +76,14 @@ const updateConsecutivePlantingMission = async(memberId) => {
                     lastUpdated: today,
                 },
                 });
-                completedMissions.push(plantingMission.id);
+                completedMissions.push({
+                    missionId: plantingMission.id,
+                    flower: plantingMission.mission.flower?
+                    {
+                        name: plantingMission.mission.flower.name, 
+                        bloomImg: plantingMission.mission.flower.bloomImg
+                    } : null      //해당 미션으로 깨지는 꽃이 없는 경우 'null'반환
+                });
             }else{
                 //연속 심기 진행 중이지만 아직 완료되지 않은 경우
                 await prisma.memberMission.update({
@@ -88,7 +95,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
             }
             }
         }
-        console.log(completedMissions);     //점검용
+        //console.log(completedMissions);     //점검용
         return completedMissions;       //완료한 미션 반환
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '연속 미션 업데이트 중 오류가 발생하였습니다.');
@@ -105,7 +112,7 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
             mission: { type: 'FOCUS_TIME'},
             completed: false
         },
-        include: {mission: true},
+        include: {mission: { include: { flower: true } } },
         });
     
         const completedMissions = [];
@@ -116,7 +123,14 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
                     where: {id: focusMission.id},
                     data: {completed: true},
                 });
-                completedMissions.push(focusMission.id);
+                completedMissions.push({
+                    missionId: plantingMission.id,
+                    flower: plantingMission.mission.flower?
+                    {
+                        name: plantingMission.mission.flower.name, 
+                        bloomImg: plantingMission.mission.flower.bloomImg
+                    } : null
+                });
             }
         }
         return completedMissions;
@@ -142,7 +156,7 @@ const updateTotalFlowerMission = async(memberId) => {
             mission: { type: 'TOTAL_FLOWERS'},
             completed: false,
         },
-        include: { mission: true},
+        include: {mission: { include: { flower: true } } },
         });
 
         const completedMissions = [];
@@ -153,7 +167,14 @@ const updateTotalFlowerMission = async(memberId) => {
                     where: { id: mission.id },
                     data: { completed: true },
                 });
-                completedMissions.push(flowerMission.id);
+                completedMissions.push({
+                    missionId: plantingMission.id,
+                    flower: plantingMission.mission.flower?
+                    {
+                        name: plantingMission.mission.flower.name, 
+                        bloomImg: plantingMission.mission.flower.bloomImg
+                    } : null
+                });
             }
         }
         return completedMissions;

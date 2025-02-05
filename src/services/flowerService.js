@@ -41,25 +41,22 @@ const setupFlower = async(memberId) => {
             }))
         });
 
-        //처음 1개의 꽃은 unlock
-        const firstFlower = await prisma.memberFlower.findFirst({
-            where: { memberId, flowerId: 1}             //1번째 꽃 id가 무조건 1이여야됨
+        //처음 3개의 꽃은 unlock(장미, 메리골드, 해바라기)
+        await prisma.memberFlower.updateMany({
+            where: {
+                memberId,
+                flowerId: { in: [1, 2, 3] }
+            },
+            data: { unlocked: true },
         });
-
-        if(firstFlower){
-            await prisma.memberFlower.updateMany({
-                where: { memberId, flowerId: 1},
-                data: {unlocked: true},
-            });
-        }
         console.log('꽃 초기할당이 완료되었습니다');          //확인용
     }catch(error){
         console.error(error);
         throw new CustomError(ErrorCodes.InternalServerError, '꽃 초기 생성 중 오류가 발생하였습니다.')
     }
-}
+};
 
 module.exports = {
     findUnlockedFlowers,
     setupFlower,
-}
+};
