@@ -41,7 +41,7 @@ const getMemberInfo = async (memberId) => {
       friendsMember: true,
       friendsFriend: true,
       flowers: true,
-      missions: true,
+      Missions: true,
       focusTimes: true,
     },
   });
@@ -49,6 +49,22 @@ const getMemberInfo = async (memberId) => {
   if (!member) {
     throw new CustomError(ErrorCodes.NotFound, '해당 회원 정보가 없습니다.');
   }
+
+  // 현재 회원의 집중시간 총합 계산 (FocusTime의 time 필드 합)
+  const currentTotalTime = member.focusTimes.reduce((sum, ft) => sum + ft.time, 0);
+
+  // 다른 회원들의 집중시간 총합 중에서, 현재 회원보다 큰 값들 중 최소값을 찾는 SQL 쿼리
+  const result = await prisma.$queryRaw`
+    SELECT "memberId", SUM("time") AS "total_time"
+    FROM "FocusTime"
+    GROUP BY "memberId"
+    HAVING SUM("time") > ${currentTotalTime}
+    ORDER BY "total_time" ASC
+    LIMIT 1
+  `;
+
+  // 쿼리 결과가 있을 경우 해당 집중시간 총합을, 없으면 null로 추가
+  member.nextTotalTime = (result[0]?.total_time - currentTotalTime) || 0;
 
   return member;
 };
