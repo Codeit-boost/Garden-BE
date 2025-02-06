@@ -74,7 +74,7 @@ const generateJWT = (member) => {
   return jwt.sign(
     { id: member.id, name: member.name },
     JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '1D' }
   );
 };
 
