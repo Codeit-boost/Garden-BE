@@ -38,6 +38,9 @@ model Member {
 
   // 집중시간(1:N)
   focusTimes FocusTime[]
+
+  //카테고리(1:N)
+  categories Category[]
 }
 
 /// 회원 간 친구 다대다 중간 테이블
@@ -117,6 +120,14 @@ model MemberMission{
 //  flower        String
 //  languageText  String // 꽃말
 //}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id])
+}
+
 
 /// 집중시간 테이블 (회원 1명 : 여러 집중시간)
 model FocusTime {
