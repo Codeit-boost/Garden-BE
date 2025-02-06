@@ -15,7 +15,7 @@ const getKakaoAuthURL = () => {
   return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}`;
 };
 
-const getFrontRedirectURL = (token) => {
+const getFrontRedirectURL = (req, token) => {
   // 🎯 클라이언트의 origin을 기반으로 리다이렉트 설정
   const clientOrigin = req.headers.origin || FRONT_DOMAIN;
   return `${clientOrigin}/home?token=${token}`;
