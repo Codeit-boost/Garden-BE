@@ -54,7 +54,7 @@ router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime
  *           text/event-stream:
  *             schema:
  *               type: string
- *               example: "data: {\"id\": 1, \"time\": \"00:15:00\", \"state\": \"IN_PROGRESS\"}\n\n"
+ *               example: "data: data: {"id":7,"category":"공부","target_time":"00:00:40","time":"00:00:00","currentFlowerImage":"","FlowerImage":null,"FlowerName":"장미","member_id":1,"createdAt":"2025-02-06T06:52:35.195Z","now":1738824755957}"
  *       401:
  *         description: 인증이 필요합니다.
  *       500:
@@ -94,38 +94,38 @@ router.get("/stream",authMiddleware,  asyncHandler(focusTimeController.focusTime
 router.get("/:focusTimeId",authMiddleware, asyncHandler(focusTimeController.focusTimeDetail));
 
 
-/**
- * @swagger
- * /api/focusTime/update:
- *   patch:
- *     tags: [FocusTime]
- *     security:
- *       - bearerAuth: []
- *     summary: 집중시간 정보 업데이트
- *     description: 진행 중인 모든 집중시간 정보를 업데이트합니다. 집중시간이 목표 시간의 특정 비율에 도달하면 꽃 이미지를 변경하고, 누적 집중시간을 갱신합니다.
- *     responses:
- *       200:
- *         description: 성공적으로 집중시간 정보가 업데이트되었습니다.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: 집중시간이 업데이트되었습니다.
- *                 updates:
- *                   type: array
- *                   items:
- *                     type: object
- *       400:
- *         description: 잘못된 요청 데이터입니다.
- *       404:
- *         description: 해당 집중시간 정보가 존재하지 않습니다.
- *       500:
- *         description: 서버 오류가 발생했습니다.
- */
-router.patch("/update", authMiddleware, asyncHandler(focusTimeController.updateFocusTimeRealTime));
+// /**
+//  * @swagger
+//  * /api/focusTime/update:
+//  *   patch:
+//  *     tags: [FocusTime]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     summary: 집중시간 정보 업데이트
+//  *     description: 진행 중인 모든 집중시간 정보를 업데이트합니다. 집중시간이 목표 시간의 특정 비율에 도달하면 꽃 이미지를 변경하고, 누적 집중시간을 갱신합니다.
+//  *     responses:
+//  *       200:
+//  *         description: 성공적으로 집중시간 정보가 업데이트되었습니다.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *                   example: 집중시간이 업데이트되었습니다.
+//  *                 updates:
+//  *                   type: array
+//  *                   items:
+//  *                     type: object
+//  *       400:
+//  *         description: 잘못된 요청 데이터입니다.
+//  *       404:
+//  *         description: 해당 집중시간 정보가 존재하지 않습니다.
+//  *       500:
+//  *         description: 서버 오류가 발생했습니다.
+//  */
+// router.patch("/update", authMiddleware, asyncHandler(focusTimeController.updateFocusTimeRealTime));
 
 
 /**
@@ -238,11 +238,11 @@ module.exports = router;
  *         target_time:
  *           type: string
  *           description: 목표 시간
- *           example: "01:30:00"
+ *           example: "00:00:40"
  *         flower_id:
  *           type: integer
  *           description: 선택한 꽃 ID
- *           example: 3
+ *           example: 1
  *         category:
  *           type: string
  *           description: 집중시간의 카테고리
