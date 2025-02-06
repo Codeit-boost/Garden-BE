@@ -1,5 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const kakaoAuthService = require('../services/kakaoAuthService');
+const missionService = require('../services/missionService');   //추가함
 
 // 카카오 로그인 URL 리다이렉트
 const kakaoLoginURL = (req, res) => {
@@ -9,7 +10,7 @@ const kakaoLoginURL = (req, res) => {
 };
 
 // 카카오 콜백 처리
-const kakaoCallback = asyncHandler(async (req, res) => {
+const kakaoCallback = async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
@@ -33,19 +34,26 @@ const kakaoCallback = asyncHandler(async (req, res) => {
 
   // 4. JWT 생성 및 반환
   const token = kakaoAuthService.generateJWT(member);
-  
-  res.status(200).json({ message: 'Login successful', token, user: member });
-});
+
+  // 5. 연속미션 업데이트
+  missionService.updateConsecutivePlantingMission(member.id);  
+
+  // 6. 리다리렉트 url
+  const redirect_uri = kakaoAuthService.getFrontRedirectURL(req, token);
+
+  // 클라이언트의 특정 페이지로 토큰을 전달하며 리다이렉트
+  res.redirect(redirect_uri);
+};
 
 // 로그아웃
-const logout = asyncHandler(async (req, res) => {
+const logout = async (req, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
-});
+};
 
 // 인증된 사용자 정보 가져오기
-const getAuthenticatedUser = asyncHandler(async (req, res) => {
+const getAuthenticatedUser = async (req, res) => {
   res.status(200).json({ user: req.user });
-});
+};
 
 module.exports = {
   kakaoLoginURL,

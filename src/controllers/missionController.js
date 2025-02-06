@@ -1,30 +1,17 @@
-const { ErrorCodes, CustomError } = require('../utils/error');
-const { PrismaClient } = require('@prisma/client');
+const asyncHandler = require('../utils/asyncHandler');
+const missionService = require('../services/missionService');
 
-const prisma = new PrismaClient();
-
-const getMissions = async(req, res) => {
-    const userId = req.user.id;
-
-  try {
-    const missions = await prisma.mission.findMany({
-      where: { 
-        memberId: Number(userId)
-      },
-      include: { 
-        flower: true 
-      },
-      orderBy: { id: 'desc' },
-    });
-
-    res.json(missions);
+//완료 X 미션목록 반환
+const getMissions = async(req, res, next) => {
+  const memberId = req.user.id;
+  try{
+    const getUncompletedMission = await missionService.uncompletedMission(memberId);
+    res.json(getUncompletedMission);
   } catch (error) {
-    throw new CustomError(
-      ErrorCodes.InternalServerError, 
-      '미션 목록 조회 중 오류가 발생했습니다.'
-    );
+    next(error);
   }
 };
+
 
  module.exports = {
     getMissions,

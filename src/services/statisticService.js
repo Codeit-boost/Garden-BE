@@ -74,17 +74,20 @@ const getCategoryAnalysis = async (memberId, startDate, endDate) => {
         }
     });
 
-    const categoryStats = {
-        STUDY: { time: 0, count: 0 },
-        WORK: { time: 0, count: 0 },
-        ETC: { time: 0, count: 0 }
-    };
+    const categoryStats = {};
 
+    // `focusTimes` 순회하며 동일한 카테고리끼리 그룹화
     focusTimes.forEach(focus => {
-        categoryStats[focus.category].time += focus.time;
-        categoryStats[focus.category].count += 1;
+        const category = focus.category; // 문자열 카테고리
+        
+        if (!categoryStats[category]) {
+            categoryStats[category] = { time: 0, count: 0 };
+        }
+    
+        categoryStats[category].time += focus.time;
+        categoryStats[category].count += 1;
     });
-
+    
     const total = Object.values(categoryStats).reduce((acc, curr) => acc + curr.time, 0);
     
     return Object.entries(categoryStats).map(([category, stats]) => ({
@@ -116,9 +119,7 @@ const getFlowerAnalysis = async (memberId, startDate, endDate) => {
         if (!flowerStats[focus.flowerId]) {
             flowerStats[focus.flowerId] = {
                 name: focus.flower.name,
-                floriography: await prisma.floriography.findFirst({
-                    where: { flower: focus.flower.name }
-                }),
+                floriography: focus.flower.language,
                 totalCount: 0,
                 bloomedCount: 0,
                 wiltedCount: 0
