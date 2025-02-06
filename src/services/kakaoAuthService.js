@@ -16,7 +16,9 @@ const getKakaoAuthURL = () => {
 };
 
 const getFrontRedirectURL = (token) => {
-  return `${FRONT_DOMAIN}/home?token=${token}`;
+  // 🎯 클라이언트의 origin을 기반으로 리다이렉트 설정
+  const clientOrigin = req.headers.origin || FRONT_DOMAIN;
+  return `${clientOrigin}/home?token=${token}`;
 };
 
 const fetchAccessToken = async (code) => {
