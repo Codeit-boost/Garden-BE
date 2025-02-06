@@ -48,7 +48,6 @@ router.use("/flower", flowerRouters);
  */
 router.use("/mission", missionRouters);
 
-<<<<<<< HEAD
 /**
  * @swagger
  * tags:
@@ -57,7 +56,6 @@ router.use("/mission", missionRouters);
  */
 router.use("/focusTime", focusTimeRouters);
 
-=======
 
 /**
  * @swagger
@@ -66,6 +64,5 @@ router.use("/focusTime", focusTimeRouters);
  *   description: 통계 관련 API
  */
 router.use("/statistic", statisticRouters);
->>>>>>> b5ab015 (feat: 통계관련 api 추가 #26)
 
 module.exports = router;
