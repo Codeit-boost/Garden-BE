@@ -23,11 +23,13 @@ router.get('/todayFlower', asyncHandler(getTodayFlower));
  *         name: fMonth
  *         schema:
  *           type: string
+ *           default: "{현재 월}"
  *         description: "조회할 월 (MM), 기본값은 현재 월"
  *       - in: query
  *         name: fDay
  *         schema:
  *           type: string
+ *           default: "{현재 일}"
  *         description: "조회할 일 (DD), 기본값은 현재 일"
  *     responses:
  *       200:

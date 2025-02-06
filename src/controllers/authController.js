@@ -39,7 +39,7 @@ const kakaoCallback = async (req, res) => {
   missionService.updateConsecutivePlantingMission(member.id);  
 
   // 6. 리다리렉트 url
-  const redirect_uri = kakaoAuthService.getFrontRedirectURL(token);
+  const redirect_uri = kakaoAuthService.getFrontRedirectURL(req, token);
 
   // 클라이언트의 특정 페이지로 토큰을 전달하며 리다이렉트
   res.redirect(redirect_uri);

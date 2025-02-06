@@ -13,8 +13,8 @@ const serviceKey = process.env.FLOWER_SERVICE_KEY;
 const currentDate = new Date();
  
 const getTodayFlower = async (req, res, next) => {
-  const fMonth = req.query.fMonth || (currentDate.getMonth()+1).toString();   //기본값: 현재 날짜
-  const fDay = req.query.fDay || currentDate.getDate().toString();
+  const fMonth = (currentDate.getMonth()+1).toString();   //기본값: 현재 날짜
+  const fDay = currentDate.getDate().toString();
   const queryParams = `?serviceKey=${encodeURIComponent(serviceKey)}&fMonth=${fMonth}&fDay=${fDay}`;
 
   try {
