@@ -38,20 +38,24 @@ const getStatistic = async (req, res) => {
             break;
     }
 
-    const [timeDistribution, categoryAnalysis, flowerAnalysis] = await Promise.all([
+    const [timeDistribution, categoryAnalysis, flowerAnalysis, myGarden] = await Promise.all([
         statisticService.getTimeDistribution(memberId, type, startDate, endDate),
         statisticService.getCategoryAnalysis(memberId, startDate, endDate),
-        statisticService.getFlowerAnalysis(memberId, startDate, endDate)
+        statisticService.getFlowerAnalysis(memberId, startDate, endDate),
+        statisticService.getMyGarden(memberId)
     ]);
+
 
     res.json({
         timeDistribution,
         categoryAnalysis,
         flowerAnalysis,
+        myGarden,
         period: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString()
         }
+
     });
 };
 
