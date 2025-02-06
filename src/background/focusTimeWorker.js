@@ -97,7 +97,7 @@ setInterval(async () => {
             data.time = data.target_time;
             data.message = "집중 시간 완료"
             sse.broadcast(event.memberId, data)
-            focusTimeService.completeFocusTimeById(event.data.id);
+            focusTimeService.completeFocusTimeById(event.memberId, event.data.id);
           }
         }else{// 스톱워치
           console.log(`⌛ FocusTime ${event.data.id}: Quarter ${event.quarter} reached`);
