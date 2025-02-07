@@ -54,9 +54,7 @@ router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime
  *           text/event-stream:
  *             schema:
  *               type: string
- *               example: "data: data: {"id":7,"category":"공부","target_time":"00:00:40","time":"00:00:00","currentFlowerImage":"","FlowerImage":null,"FlowerName":"장미","member_id":1,"createdAt":"2025-02-06T06:52:35.195Z","now":1738824755957}"
- *       401:
- *         description: 인증이 필요합니다.
+ *               example: 'data: {"id":7,"category":"공부","target_time":"00:00:40","time":"00:00:00","currentFlowerImage":"","FlowerImage":null,"FlowerName":"장미","member_id":1,"createdAt":"2025-02-06T06:52:35.195Z","now":1738824755957}'
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
