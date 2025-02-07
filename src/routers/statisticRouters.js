@@ -85,6 +85,21 @@ router.get("", authMiddleware, asyncHandler(statisticController.getStatistic));
  *                         type: number
  *                       wiltedCount:
  *                         type: number
+ *                 myGarden:
+ *                   type: array
+ *                   description: 사용자가 성공적으로 피운 꽃들의 목록
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         description: 꽃이름
+ *                       language:
+ *                         type: string
+ *                         description: 꽃말
+ *                       FlowerImg:
+ *                         type: string
+ *                         description: 꽃 이미지 URL
  *                 period:
  *                   type: object
  *                   properties:

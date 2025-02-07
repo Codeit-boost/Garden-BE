@@ -15,7 +15,14 @@ const StatisticsQuery = s.object({
     week: s.optional(s.integer())
 });
 
+const GardenResponse = s.object({
+  name: s.string(),
+  language: s.string(),
+  FlowerImg: s.optional(s.string()),
+});
+
 module.exports = {
     DateRange,
-    StatisticsQuery
+    StatisticsQuery,
+    GardenResponse
 };
