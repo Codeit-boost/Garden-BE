@@ -110,7 +110,7 @@ setInterval(async () => {
         }
       }else{ // sse에 클라이언트가 없다면 종료 또는 취소
         console.log("sse미연결로 삭제")
-        focusTimeService.endFocusTimeById(event.data.id);
+        focusTimeService.endFocusTimeById(event.memberId, event.data.id);
       }
     }
   } catch (error) {
