@@ -15,8 +15,8 @@ const generateMockMissions = async() => {
         {title: '중급 가드너', description: '총 5개의 꽃을 심었어요', type: MissionType.TOTAL_FLOWERS, targetValue: 5, flowerId: createdFlowers[7].id},
         {title: '고급 가드너', description: '총 10개의 꽃을 심었어요', type: MissionType.TOTAL_FLOWERS, targetValue: 10, flowerId: createdFlowers[8].id},
         {title: '5시간 집중', description: '총 5시간 동안 집중했어요', type: MissionType.FOCUS_TIME, targetValue: 5, flowerId: createdFlowers[9].id},
-        {title: '10시간 집중', description: '총 10시간 동안 집중했어요', type: MissionType.FOCUS_TIME, targetValue: 10},
-        {title: '10시간 집중', description: '총 15시간 동안 집중했어요', type: MissionType.FOCUS_TIME, targetValue: 15},
+        {title: '10시간 집중', description: '총 10시간 동안 집중했어요', type: MissionType.FOCUS_TIME, targetValue: 10, flowerId: createdFlowers[10].id},
+        {title: '10시간 집중', description: '총 15시간 동안 집중했어요', type: MissionType.FOCUS_TIME, targetValue: 15, flowerId: createdFlowers[11].id},
     ];
 
     for (const mission of missions){
@@ -27,16 +27,18 @@ const generateMockMissions = async() => {
 // 꽃 생성 함수
 const generateMockFlowers = async() => {
     const flowers = [
-        {name: '장미', language: '사랑, 열정'},                 
-        {name: '해바라기', language: '희망, 기다림, 숭배'},         
-        {name: '메리골드', language: '반드시 오고야 말 행복'},      
-        {name: '초롱꽃', language: '인도, 침묵'},
-        {name: '코스모스', language: '소녀의 순결, 순정'},
-        {name: '수선화', language: '자존심, 고결, 신비'},
-        {name: '물망초', language: '날 잊지 마세요, 진실한 사랑'},
-        {name: '능소화', language: '명예, 영광'},
-        {name: '제비꽃', language: '순진한 사랑'},
-        {name: '라벤더', language: '정절, 침묵'},
+        {name: '장미', language: '사랑, 열정', IMG: '이미지_URL'},                 
+        {name: '해바라기', language: '희망, 기다림, 숭배', IMG: '이미지_URL'},         
+        {name: '메리골드', language: '반드시 오고야 말 행복', IMG: '이미지_URL'},      
+        {name: '초롱꽃', language: '인도, 침묵', IMG: '이미지_URL'},
+        {name: '코스모스', language: '소녀의 순결, 순정', IMG: '이미지_URL'},
+        {name: '수선화', language: '자존심, 고결, 신비', IMG: '이미지_URL'},
+        {name: '물망초', language: '날 잊지 마세요, 진실한 사랑', IMG: '이미지_URL'},
+        {name: '능소화', language: '명예, 영광', IMG: '이미지_URL'},
+        {name: '제비꽃', language: '순진한 사랑', IMG: '이미지_URL'},
+        {name: '라벤더', language: '정절, 침묵', IMG: '이미지_URL'},
+        {name: '도라지꽃', language: '영원한 사랑', IMG: '이미지_URL'},
+        {name: '히아신스', language: '유희, 겸손한 사랑', IMG: '이미지_URL'},
     ];
 
     for(const flower of flowers){
@@ -44,7 +46,7 @@ const generateMockFlowers = async() => {
             data:{
                 name: flower.name,
                 language: flower.language,
-                FlowerImg: '활짝핀꽃이미지URL'
+                FlowerImg: flower.IMG
             },
         });
     }

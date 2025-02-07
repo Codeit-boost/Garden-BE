@@ -4,14 +4,9 @@ const focusTimeService = require("../services/focusTimeService.js");
 const sse = require("../sse/sse.js");
 const { convertStringToSeconds, convertSecondsToString } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage } = require("../utils/updateFlowerImage.js");
+const redisClient = require("../config/redisClient"); // 이렇게 불러오면 재사용 가능
 
 const STOPWATCH = process.env.STOPWATCH;
-
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL
-});
-
-redisClient.connect().catch(console.error);
 
 const SCHEDULE_KEY = 'focusTime:timers';
 

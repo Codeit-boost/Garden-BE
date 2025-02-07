@@ -42,6 +42,10 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
                 const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
                 distribution[days[day]] += focus.time;
             });
+            
+            Object.keys(distribution).forEach(day => {
+              distribution[day] = Math.round((distribution[day] / 60) * 100) / 100;
+            });
             break;
 
         case 'monthly':
@@ -138,8 +142,32 @@ const getFlowerAnalysis = async (memberId, startDate, endDate) => {
         .sort((a, b) => b.totalCount - a.totalCount);
 };
 
+const getMyGarden = async (memberId) => {
+  // 사용자가 심은 꽃들 중 완전히 핀(BLOOMED) 꽃들을 조회
+  const bloomedFlowers = await prisma.focusTime.findMany({
+      where: {
+          memberId: memberId,
+          state: 'BLOOMED'
+      },
+      include: {
+          flower: true
+      },
+      distinct: ['flowerId'],  // 꽃 ID로 중복 제거
+  });
+
+  // 꽃 정보만 추출
+  return bloomedFlowers.map(focusTime => ({
+      name: focusTime.flower.name,
+      language: focusTime.flower.language,
+      FlowerImg: focusTime.flower.FlowerImg
+  }));
+};
+
+
+
 module.exports = {
     getTimeDistribution,
     getCategoryAnalysis,
-    getFlowerAnalysis
+    getFlowerAnalysis,
+    getMyGarden
 };

@@ -7,6 +7,7 @@ const authRouters = require("./authRoutes");
 const memberRouters = require("./memberRoutes");
 const focusTimeRouters = require('./focusTimeRouters.js');
 const statisticRouters = require('./statisticRouters.js');
+const categoryRouters = require('./categoryRouters');
 
 /**
  * @swagger
@@ -63,5 +64,13 @@ router.use("/focusTime", focusTimeRouters);
  *   description: 통계 관련 API
  */
 router.use("/statistic", statisticRouters);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Category
+ *   description: 카테고리 관련 API
+ */
+router.use("/category", categoryRouters);
 
 module.exports = router;
