@@ -33,15 +33,17 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
         case 'weekly':
             // 요일별 분배
             distribution = {
-                'MON': 0, 'TUE': 0, 'WED': 0, 'THU': 0,
-                'FRI': 0, 'SAT': 0, 'SUN': 0
+                '월': 0, '화': 0, '수': 0, '목': 0,
+                '금': 0, '토': 0, '일': 0
             };
             
+
             focusTimes.forEach(focus => {
                 const day = focus.createdAt.getDay();
-                const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                const days = ['일', '월', '화', '수', '목', '금', '토'];
                 distribution[days[day]] += focus.time;
             });
+
             
             Object.keys(distribution).forEach(day => {
               distribution[day] = Math.round((distribution[day] / 60) * 100) / 100;
@@ -57,11 +59,18 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
             
             focusTimes.forEach(focus => {
                 const month = focus.createdAt.getMonth() + 1;
+                distribution[month] += focus.time;
                 // 분 단위를 시간 단위로 변환
-                distribution[month] = Math.round((distribution[month] + focus.time) / 60 * 100) / 100;
+            });
+            
+            
+            Object.keys(distribution).forEach(month => {
+                distribution[month] = Math.round((distribution[month] / 60) * 100) / 100;
+                // 누적이 완료된 후 한 번에 시간 단위로 변환
             });
             break;
     }
+
 
     return distribution;
 };
