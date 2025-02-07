@@ -7,7 +7,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/categories:
+ * /api/categories/me:
  *   get:
  *     summary: "사용자의 카테고리 목록 조회"
  *     description: "로그인한 사용자가 만든 카테고리들의 목록을 반환합니다."
@@ -33,11 +33,11 @@ const router = express.Router();
  *         description: "서버 오류"
  */
 //카테고리 목록 조회
-router.get('/', authMiddleware, asyncHandler(categoryController.getCategories));
+router.get('/me', authMiddleware, asyncHandler(categoryController.getCategories));
 
 /**
  * @swagger
- * /api/categories:
+ * /api/categories/me:
  *   post:
  *     summary: "새로운 카테고리 생성"
  *     description: "사용자가 새 카테고리를 생성합니다."
@@ -74,7 +74,7 @@ router.get('/', authMiddleware, asyncHandler(categoryController.getCategories));
  *         description: "서버 오류"
  */
 //카테고리 생성
-router.post('/', authMiddleware, asyncHandler(categoryController.createCategory));
+router.post('/me', authMiddleware, asyncHandler(categoryController.createCategory));
 
 /**
  * @swagger
