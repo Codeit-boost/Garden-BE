@@ -3,6 +3,7 @@ const { ErrorCodes, CustomError } = require('../utils/error');
 
 const prisma = new PrismaClient();
 
+// 모든 유저 랭킹
 const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
 
@@ -30,13 +31,59 @@ const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
 
   // BigInt 변환
   // 프론트로 어떤 형식으로 시간을 보낼 건지 논의 했어용
-  // ✅ BigInt 변환 (Number() 사용)
+  // BigInt 변환 (Number() 사용)
   const formattedResults = results.map(member => ({
     id: Number(member.id),  // BigInt → Number 변환
     name: member.name,
     totalFocusTime: Number(member.totalFocusTime), // BigInt → Number 변환
     wiltedCount: Number(member.wiltedCount), // BigInt → Number 변환
     bloomedCount: Number(member.bloomedCount) // BigInt → Number 변환
+  }));
+
+  return formattedResults;
+};
+
+// 친구 랭킹
+const getFriendsWithTotalFocusTime = async (myMemberId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const results = await prisma.$queryRaw`
+    WITH friend_ids AS (
+      -- 내가 추가한 친구들의 ID
+      SELECT "friendId" AS id FROM "MemberFriend" WHERE "memberId" = ${myMemberId}
+      UNION
+      -- 나를 친구로 추가한 친구들의 ID
+      SELECT "memberId" AS id FROM "MemberFriend" WHERE "friendId" = ${myMemberId}
+    )
+    SELECT
+      m.id,
+      m.name,
+      m.img,
+      COALESCE(fs."totalFocusTime", 0) AS "totalFocusTime",
+      COALESCE(fs."wiltedCount", 0) AS "wiltedCount",
+      COALESCE(fs."bloomedCount", 0) AS "bloomedCount"
+    FROM friend_ids fi
+    JOIN "Member" m ON m.id = fi.id
+    LEFT JOIN (
+      SELECT
+        ft."memberId",
+        SUM(ft."time") AS "totalFocusTime",
+        COUNT(CASE WHEN ft."state" = 'WILTED' THEN 1 END) AS "wiltedCount",
+        COUNT(CASE WHEN ft."state" = 'BLOOMED' THEN 1 END) AS "bloomedCount"
+      FROM "FocusTime" ft
+      GROUP BY ft."memberId"
+    ) fs ON m.id = fs."memberId"
+    ORDER BY "totalFocusTime" DESC
+    LIMIT ${limit} OFFSET ${offset};
+  `;
+
+  const formattedResults = results.map(friend => ({
+    id: Number(friend.id),
+    name: friend.name,
+    img: friend.img,           // 프로필 이미지 URL
+    totalFocusTime: Number(friend.totalFocusTime),
+    wiltedCount: Number(friend.wiltedCount),
+    bloomedCount: Number(friend.bloomedCount)
   }));
 
   return formattedResults;
@@ -148,6 +195,7 @@ const deleteFriend = async (memberId, friendId) => {
 
 module.exports = {
   getMembersWithTotalFocusTime,
+  getFriendsWithTotalFocusTime,
   getMemberInfo,
   updateMemberInfo,
   deleteMemberAccount,

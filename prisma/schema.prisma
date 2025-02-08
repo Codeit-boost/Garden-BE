@@ -94,7 +94,7 @@ model Mission {
   //memberId    Int     // 미션 주인 (회원)
   flowerId    Int?    // 잠금해제되는 꽃 (없을 수도 있음)
   type        MissionType   //미션 종류
-  targetValue  Int     //미션 목표값
+  targetValue  Int     //미션 목표값ㅌ
 
   //member Member  @relation(fields: [memberId], references: [id])
   flower Flower? @relation(fields: [flowerId], references: [id])
