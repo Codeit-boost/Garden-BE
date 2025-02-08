@@ -7,26 +7,26 @@ const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
 
   const results = await prisma.$queryRaw`
+  SELECT
+    m.id,
+    m.name,
+    COALESCE(focus_summary."totalFocusTime", 0) AS "totalFocusTime",
+    COALESCE(focus_summary."wiltedCount", 0) AS "wiltedCount",
+    COALESCE(focus_summary."bloomedCount", 0) AS "bloomedCount"
+  FROM "Member" m
+  LEFT JOIN (
     SELECT
-      m.id,
-      m.name,
-      COALESCE(focus_summary.totalFocusTime, 0) AS "totalFocusTime",
-      COALESCE(focus_summary.wiltedCount, 0) AS "wiltedCount",
-      COALESCE(focus_summary.bloomedCount, 0) AS "bloomedCount"
-    FROM "Member" m
-    LEFT JOIN (
-      SELECT
-        ft."memberId",
-        SUM(ft.time) AS "totalFocusTime",
-        COUNT(CASE WHEN ft.state = 'WILTED' THEN 1 END) AS "wiltedCount",
-        COUNT(CASE WHEN ft.state = 'BLOOMED' THEN 1 END) AS "bloomedCount"
-      FROM "FocusTime" ft
-      GROUP BY ft."memberId"
-    ) AS focus_summary
-    ON m.id = focus_summary."memberId"
-    ORDER BY "totalFocusTime" DESC
-    LIMIT ${limit} OFFSET ${offset};
-  `;
+      ft."memberId",
+      SUM(ft."time") AS "totalFocusTime",
+      COUNT(CASE WHEN ft."state" = 'WILTED' THEN 1 END) AS "wiltedCount",
+      COUNT(CASE WHEN ft."state" = 'BLOOMED' THEN 1 END) AS "bloomedCount"
+    FROM "FocusTime" ft
+    GROUP BY ft."memberId"
+  ) AS focus_summary
+  ON m.id = focus_summary."memberId"
+  ORDER BY "totalFocusTime" DESC
+  LIMIT ${limit} OFFSET ${offset};
+`;
 
   // BigInt 변환
   // 프론트로 어떤 형식으로 시간을 보낼 건지 논의 했어용
