@@ -50,8 +50,8 @@ model MemberFriend {
   memberId Int
   friendId Int
 
-  member Member @relation("MemberFriends_Member", fields: [memberId], references: [id])
-  friend Member @relation("MemberFriends_Friend", fields: [friendId], references: [id])
+  member Member @relation("MemberFriends_Member", fields: [memberId], references: [id], onDelete: Cascade)
+  friend Member @relation("MemberFriends_Friend", fields: [friendId], references: [id], onDelete: Cascade)
 
   @@id([memberId, friendId])
 }
@@ -80,7 +80,7 @@ model MemberFlower {
   flowerId Int
   unlocked Boolean @default(false) // 잠금해제 여부
 
-  member Member @relation(fields: [memberId], references: [id])
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
   flower Flower @relation(fields: [flowerId], references: [id])
 
   @@id([memberId, flowerId])
@@ -97,7 +97,7 @@ model Mission {
   targetValue  Int     //미션 목표값ㅌ
 
   //member Member  @relation(fields: [memberId], references: [id])
-  flower Flower? @relation(fields: [flowerId], references: [id])
+  flower      Flower?     @relation(fields: [flowerId], references: [id], onDelete: SetNull)
   memberMissions MemberMission[]
 }
 
@@ -110,8 +110,8 @@ model MemberMission{
   completed Boolean @default(false)   //성공 여부
   lastUpdated  DateTime?           //연속 미션 업데이트 날짜
 
-  member Member @relation(fields: [memberId], references: [id])
-  mission Mission @relation(fields: [missionId], references: [id])
+  member  Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   @@unique([memberId, missionId])
 }
@@ -127,7 +127,7 @@ model Category {
   id        Int      @id @default(autoincrement())
   name      String
   memberId  Int
-  member    Member   @relation(fields: [memberId], references: [id])
+  member   Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 
@@ -142,7 +142,7 @@ model FocusTime {
   createdAt   DateTime?     @default(now()) // 만든 시간
   state       FocusState    @default(IN_PROGRESS) // 진행 상태 (진행중, 시듦, 활짝)
 
-  member Member @relation(fields: [memberId], references: [id])
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
   flower Flower @relation(fields: [flowerId], references: [id])
 }
 
