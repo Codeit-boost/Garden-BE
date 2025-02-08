@@ -62,6 +62,73 @@ router.get('', asyncHandler(memberControllers.getMembers));
 
 /**
  * @swagger
+ * /api/members/friends:
+ *   get:
+ *     summary: 내 친구 목록을 집중시간 총합 순으로 페이지네이션 조회
+ *     tags: [Members]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: "페이지 번호 (기본값: 1)"
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: "페이지당 항목 수 (기본값: 10)"
+ *     responses:
+ *       200:
+ *         description: 친구 목록 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   description: "현재 페이지 번호"
+ *                 limit:
+ *                   type: integer
+ *                   description: "페이지당 항목 수"
+ *                 members:
+ *                   type: array
+ *                   description: "친구 목록"
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: "친구 멤버 ID"
+ *                       name:
+ *                         type: string
+ *                         description: "친구 이름"
+ *                       img:
+ *                         type: string
+ *                         nullable: true
+ *                         description: "프로필 이미지 URL"
+ *                       email:
+ *                         type: string
+ *                         nullable: true
+ *                         description: "이메일"
+ *                       totalFocusTime:
+ *                         type: integer
+ *                         description: "총 집중 시간 (초)"
+ *                       wiltedCount:
+ *                         type: integer
+ *                         description: "시든 꽃 개수"
+ *                       bloomedCount:
+ *                         type: integer
+ *                         description: "핀 꽃 개수"
+ *       401:
+ *         description: 인증 실패
+ */
+router.get('/friends', authMiddleware, asyncHandler(memberControllers.getFriends));
+
+/**
+ * @swagger
  * /api/members/me:
  *   get:
  *     summary: 회원 상세 정보 조회
@@ -85,17 +152,27 @@ router.get('', asyncHandler(memberControllers.getMembers));
  *                 name:
  *                   type: string
  *                   example: "이승찬"
+ *                 img:
+ *                   type: string
+ *                   nullable: true
+ *                   description: 회원 프로필 이미지 URL
+ *                   example: "https://example.com/profile.jpg"
+ *                 email:
+ *                   type: string
+ *                   nullable: true
+ *                   description: 회원 이메일 주소
+ *                   example: "example@email.com"
  *                 alarm:
  *                   type: boolean
  *                   example: false
  *                 mode:
  *                   type: string
  *                   nullable: true
- *                   example: null
+ *                   example: "기본"
  *                 sound:
  *                   type: string
  *                   nullable: true
- *                   example: null
+ *                   example: "새소리"
  *                 friendsMember:
  *                   type: array
  *                   description: 사용자가 친구 추가한 목록
@@ -130,19 +207,19 @@ router.get('', asyncHandler(memberControllers.getMembers));
  *                 wiltedCount:
  *                   type: integer
  *                   description: 시든 꽃 개수
- *                   example: 5
+ *                   example: 8
  *                 bloomedCount:
  *                   type: integer
  *                   description: 핀 꽃 개수
- *                   example: 11
+ *                   example: 12
  *                 currentTotalTime:
  *                   type: integer
  *                   description: 현재 회원의 총 집중 시간 (초 단위)
- *                   example: 1692
+ *                   example: 1732
  *                 nextTotalTime:
  *                   type: integer
  *                   nullable: true
- *                   description: 현재 회원보다 높은 집중시간을 가진 다음 회원의 총 시간 차이 (없으면 null)
+ *                   description: 현재 회원보다 높은 집중 시간을 가진 다음 회원의 총 시간 차이 (없으면 null)
  *                   example: null
  *       404:
  *         description: 회원 정보 없음

@@ -13,6 +13,20 @@ const getMembers = async (req, res) => {
   });
 };
 
+// 모든 친구 조회 (총 집중시간 순으로)
+const getFriends = async (req, res) => {
+  const memberId = req.user.id
+  const { page = 1, limit = 10 } = req.query;
+
+  const members = await memberService.getFriendsWithTotalFocusTime(memberId,parseInt(page), parseInt(limit));
+
+  res.status(200).json({
+    page: parseInt(page),
+    limit: parseInt(limit),
+    members,
+  });
+};
+
 // 현재 회원 정보 조회
 const getMyInfo = async (req, res) => {
   const memberId = req.user.id;
@@ -62,6 +76,7 @@ const removeFriend = async (req, res) => {
 
 module.exports = {
   getMembers,
+  getFriends,
   getMyInfo,
   updateMyInfo,
   deleteMyAccount,

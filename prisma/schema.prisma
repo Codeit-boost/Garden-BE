@@ -18,6 +18,8 @@ model Member {
   id       Int      @id @default(autoincrement())
   kakaoUserId   String?   @unique// 카카오 로그인 사용자 ID
   name     String   // 이름
+  img      String?  // 프로필 이미지 URL
+  email    String?  @unique // 이메일 (카카오에서 제공)
   alarm    Boolean? @default(false) // 알람
   mode     String?  // 모드
   sound    String?  // 소리
@@ -92,7 +94,7 @@ model Mission {
   //memberId    Int     // 미션 주인 (회원)
   flowerId    Int?    // 잠금해제되는 꽃 (없을 수도 있음)
   type        MissionType   //미션 종류
-  targetValue  Int     //미션 목표값
+  targetValue  Int     //미션 목표값ㅌ
 
   //member Member  @relation(fields: [memberId], references: [id])
   flower Flower? @relation(fields: [flowerId], references: [id])
