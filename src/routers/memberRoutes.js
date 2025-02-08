@@ -16,12 +16,12 @@ const router = express.Router();
  *         name: page
  *         schema:
  *           type: integer
- *         description: 페이지 번호
+ *         description: "페이지 번호 (기본값: 1)"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: 페이지당 항목 수
+ *         description: "페이지당 항목 수 (기본값: 10)"
  *     responses:
  *       200:
  *         description: 멤버 목록 반환
@@ -32,16 +32,34 @@ const router = express.Router();
  *               properties:
  *                 page:
  *                   type: integer
+ *                   description: "현재 페이지 번호"
  *                 limit:
  *                   type: integer
+ *                   description: "페이지당 항목 수"
  *                 members:
  *                   type: array
+ *                   description: "멤버 목록"
  *                   items:
  *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: "멤버 ID"
+ *                       name:
+ *                         type: string
+ *                         description: "멤버 이름"
+ *                       totalFocusTime:
+ *                         type: integer
+ *                         description: "총 집중 시간 (단위: 초)"
+ *                       wiltedCount:
+ *                         type: integer
+ *                         description: "시든 꽃 개수"
+ *                       bloomedCount:
+ *                         type: integer
+ *                         description: "핀 꽃 개수"
  */
 router.get('', asyncHandler(memberControllers.getMembers));
 
-module.exports = router;
 /**
  * @swagger
  * /api/members/me:
@@ -61,12 +79,71 @@ module.exports = router;
  *                 id:
  *                   type: integer
  *                   example: 1
+ *                 kakaoUserId:
+ *                   type: string
+ *                   example: "3892295605"
  *                 name:
  *                   type: string
- *                   example: John Doe
+ *                   example: "이승찬"
  *                 alarm:
  *                   type: boolean
- *                   example: true
+ *                   example: false
+ *                 mode:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *                 sound:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *                 friendsMember:
+ *                   type: array
+ *                   description: 사용자가 친구 추가한 목록
+ *                   items:
+ *                     type: object
+ *                     properties: {}
+ *                   example: []
+ *                 friendsFriend:
+ *                   type: array
+ *                   description: 사용자를 친구 추가한 목록
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       memberId:
+ *                         type: integer
+ *                         example: 2
+ *                       friendId:
+ *                         type: integer
+ *                         example: 1
+ *                 flowers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties: {}
+ *                   example: []
+ *                 Missions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties: {}
+ *                   example: []
+ *                 wiltedCount:
+ *                   type: integer
+ *                   description: 시든 꽃 개수
+ *                   example: 5
+ *                 bloomedCount:
+ *                   type: integer
+ *                   description: 핀 꽃 개수
+ *                   example: 11
+ *                 currentTotalTime:
+ *                   type: integer
+ *                   description: 현재 회원의 총 집중 시간 (초 단위)
+ *                   example: 1692
+ *                 nextTotalTime:
+ *                   type: integer
+ *                   nullable: true
+ *                   description: 현재 회원보다 높은 집중시간을 가진 다음 회원의 총 시간 차이 (없으면 null)
+ *                   example: null
  *       404:
  *         description: 회원 정보 없음
  *       401:
