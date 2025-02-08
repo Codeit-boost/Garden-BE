@@ -53,14 +53,18 @@ const fetchUserInfo = async (accessToken) => {
   return userResponse.json();
 };
 
-const findOrCreateMember = async (kakaoUserId, nickname) => {
-  let member = await prisma.member.findUnique({ where: { kakaoUserId } });
+const findOrCreateMember = async(kakaoUserId, nickname, profileImage, email) =>{
+  let member = await prisma.member.findUnique({
+    where: { kakaoUserId },
+  });
 
   if (!member) {
     member = await prisma.member.create({
       data: {
-        name: nickname,
         kakaoUserId,
+        name: nickname,
+        img: profileImage,
+        email: email,
       },
     });
     await missionService.setupMission(member.id);   // 미션 초기할당
