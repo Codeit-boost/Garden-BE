@@ -61,35 +61,35 @@ router.post("", authMiddleware, asyncHandler(focusTimeController.createFocusTime
 router.get("/stream",authMiddleware,  asyncHandler(focusTimeController.focusTimeSSE));
 
 
-/**
- * @swagger
- * /api/focusTime/{focusTimeId}:
- *   get:
- *     tags: [FocusTime]
- *     security:
- *       - bearerAuth: []
- *     summary: 집중시간 세부 조회
- *     description: 4분할 시간마다 집중시간의 세부 정보를 조회합니다.
- *     parameters:
- *       - in: path
- *         name: focusTimeId
- *         required: true
- *         schema:
- *           type: integer
- *         description: 조회할 집중시간의 ID
- *     responses:
- *       200:
- *         description: 성공적으로 집중시간 세부 정보를 조회했습니다.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/FocusTime'
- *       404:
- *         description: 해당 집중시간 정보가 존재하지 않습니다.
- *       500:
- *         description: 서버 오류가 발생했습니다.
- */
-router.get("/:focusTimeId",authMiddleware, asyncHandler(focusTimeController.focusTimeDetail));
+// /**
+//  * @swagger
+//  * /api/focusTime/{focusTimeId}:
+//  *   get:
+//  *     tags: [FocusTime]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     summary: 집중시간 세부 조회
+//  *     description: 4분할 시간마다 집중시간의 세부 정보를 조회합니다.
+//  *     parameters:
+//  *       - in: path
+//  *         name: focusTimeId
+//  *         required: true
+//  *         schema:
+//  *           type: integer
+//  *         description: 조회할 집중시간의 ID
+//  *     responses:
+//  *       200:
+//  *         description: 성공적으로 집중시간 세부 정보를 조회했습니다.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               $ref: '#/components/schemas/FocusTime'
+//  *       404:
+//  *         description: 해당 집중시간 정보가 존재하지 않습니다.
+//  *       500:
+//  *         description: 서버 오류가 발생했습니다.
+//  */
+// router.get("/:focusTimeId",authMiddleware, asyncHandler(focusTimeController.focusTimeDetail));
 
 
 // /**
