@@ -10,25 +10,33 @@ const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
     SELECT
       m.id,
       m.name,
-      COALESCE(SUM(ft.time), 0) AS "totalFocusTime"
-    FROM
-      "Member" m
-    LEFT JOIN
-      "FocusTime" ft
-    ON
-      m.id = ft."memberId"
-    GROUP BY
-      m.id
-    ORDER BY
-      "totalFocusTime" DESC
+      COALESCE(focus_summary.totalFocusTime, 0) AS "totalFocusTime",
+      COALESCE(focus_summary.wiltedCount, 0) AS "wiltedCount",
+      COALESCE(focus_summary.bloomedCount, 0) AS "bloomedCount"
+    FROM "Member" m
+    LEFT JOIN (
+      SELECT
+        ft."memberId",
+        SUM(ft.time) AS "totalFocusTime",
+        COUNT(CASE WHEN ft.state = 'WILTED' THEN 1 END) AS "wiltedCount",
+        COUNT(CASE WHEN ft.state = 'BLOOMED' THEN 1 END) AS "bloomedCount"
+      FROM "FocusTime" ft
+      GROUP BY ft."memberId"
+    ) AS focus_summary
+    ON m.id = focus_summary."memberId"
+    ORDER BY "totalFocusTime" DESC
     LIMIT ${limit} OFFSET ${offset};
   `;
 
   // BigInt 변환
-  // 프론트로 어떤 형식으로 시간을 보낼 건지 논의 필요!
-  const formattedResults = results.map((result) => ({
-    ...result,
-    totalFocusTime: result.totalFocusTime.toString(), // BigInt를 문자열로 변환
+  // 프론트로 어떤 형식으로 시간을 보낼 건지 논의 했어용
+  // ✅ BigInt 변환 (Number() 사용)
+  const formattedResults = results.map(member => ({
+    id: Number(member.id),  // BigInt → Number 변환
+    name: member.name,
+    totalFocusTime: Number(member.totalFocusTime), // BigInt → Number 변환
+    wiltedCount: Number(member.wiltedCount), // BigInt → Number 변환
+    bloomedCount: Number(member.bloomedCount) // BigInt → Number 변환
   }));
 
   return formattedResults;
@@ -42,7 +50,11 @@ const getMemberInfo = async (memberId) => {
       friendsFriend: true,
       flowers: true,
       Missions: true,
-      focusTimes: true,
+      focusTimes: {
+        select: {
+          time: true,
+        },
+      },
     },
   });
 
@@ -77,9 +89,12 @@ const getMemberInfo = async (memberId) => {
   `;
 
   // 쿼리 결과가 있을 경우 해당 집중시간 총합을, 없으면 null로 추가
-  member.nextTotalTime = (result[0]?.total_time - currentTotalTime) || null;
+  // BigInt → Number 변환 후 연산
+  member.nextTotalTime = result[0]?.total_time ? Number(result[0].total_time) - currentTotalTime : null;
 
-  return member;
+  const { focusTimes, ...data } = member;
+
+  return data;
 };
 
 const updateMemberInfo = async (memberId, dataToUpdate) => {
