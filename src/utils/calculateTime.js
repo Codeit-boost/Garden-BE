@@ -30,6 +30,17 @@ const convertSecondsToString = (time) => {
 };
 
 /**
+ * 시간을 초 단위에서 HH:MM 형태로 변환하는 함수
+ */
+const convertSecondsToHHMM = (time) => {
+    const totalSeconds = Math.floor(time);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+/**
  * 시간을 HH:MM:SS 형태에서 초 단위로 변환하는 함수
  */
 const convertStringToSeconds = (time) => {
@@ -55,6 +66,7 @@ const convertTimeToHours = (time) => {
 module.exports = {
     calculateElapsedTime,
     convertSecondsToString,
+    convertSecondsToHHMM,
     convertStringToSeconds,
     convertTimeToHours
 };

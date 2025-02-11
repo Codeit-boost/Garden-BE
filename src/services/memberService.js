@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { ErrorCodes, CustomError } = require('../utils/error');
+const { convertSecondsToHHMM } = require("../utils/calculateTime.js");
 
 const prisma = new PrismaClient();
 
@@ -35,7 +36,7 @@ const getMembersWithTotalFocusTime = async (page = 1, limit = 10) => {
   const formattedResults = results.map(member => ({
     id: Number(member.id),  // BigInt → Number 변환
     name: member.name,
-    totalFocusTime: Number(member.totalFocusTime), // BigInt → Number 변환
+    totalFocusTime: convertSecondsToHHMM(Number(member.totalFocusTime)), // BigInt → Number 변환
     wiltedCount: Number(member.wiltedCount), // BigInt → Number 변환
     bloomedCount: Number(member.bloomedCount) // BigInt → Number 변환
   }));
@@ -81,7 +82,7 @@ const getFriendsWithTotalFocusTime = async (myMemberId, page = 1, limit = 10) =>
     id: Number(friend.id),
     name: friend.name,
     img: friend.img,           // 프로필 이미지 URL
-    totalFocusTime: Number(friend.totalFocusTime),
+    totalFocusTime: convertSecondsToHHMM(Number(friend.totalFocusTime)),
     wiltedCount: Number(friend.wiltedCount),
     bloomedCount: Number(friend.bloomedCount)
   }));
@@ -93,10 +94,6 @@ const getMemberInfo = async (memberId) => {
   const member = await prisma.member.findUnique({
     where: { id: memberId },
     include: {
-      friendsMember: true,
-      friendsFriend: true,
-      flowers: true,
-      Missions: true,
       focusTimes: {
         select: {
           time: true,
@@ -140,6 +137,9 @@ const getMemberInfo = async (memberId) => {
   member.nextTotalTime = result[0]?.total_time ? Number(result[0].total_time) - currentTotalTime : null;
 
   const { focusTimes, ...data } = member;
+
+  data.currentTotalTime = convertSecondsToHHMM(data.currentTotalTime),
+  data.nextTotalTime = convertSecondsToHHMM(data.nextTotalTime)
 
   return data;
 };

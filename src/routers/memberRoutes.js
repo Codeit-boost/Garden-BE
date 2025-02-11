@@ -50,7 +50,7 @@ const router = express.Router();
  *                         description: "멤버 이름"
  *                       totalFocusTime:
  *                         type: integer
- *                         description: "총 집중 시간 (단위: 초)"
+ *                         description: "총 집중 시간 (단위: 분)"
  *                       wiltedCount:
  *                         type: integer
  *                         description: "시든 꽃 개수"
@@ -115,7 +115,7 @@ router.get('', asyncHandler(memberControllers.getMembers));
  *                         description: "이메일"
  *                       totalFocusTime:
  *                         type: integer
- *                         description: "총 집중 시간 (초)"
+ *                         description: "총 집중 시간 (분)"
  *                       wiltedCount:
  *                         type: integer
  *                         description: "시든 꽃 개수"
@@ -156,54 +156,21 @@ router.get('/friends', authMiddleware, asyncHandler(memberControllers.getFriends
  *                   type: string
  *                   nullable: true
  *                   description: 회원 프로필 이미지 URL
- *                   example: "https://example.com/profile.jpg"
+ *                   example: null
  *                 email:
  *                   type: string
  *                   nullable: true
  *                   description: 회원 이메일 주소
- *                   example: "example@email.com"
+ *                   example: null
  *                 alarm:
  *                   type: boolean
  *                   example: false
  *                 mode:
  *                   type: string
- *                   nullable: true
  *                   example: "기본"
  *                 sound:
  *                   type: string
- *                   nullable: true
  *                   example: "새소리"
- *                 friendsMember:
- *                   type: array
- *                   description: 사용자가 친구 추가한 목록
- *                   items:
- *                     type: object
- *                     properties: {}
- *                   example: []
- *                 friendsFriend:
- *                   type: array
- *                   description: 사용자를 친구 추가한 목록
- *                   items:
- *                     type: object
- *                     properties:
- *                       memberId:
- *                         type: integer
- *                         example: 2
- *                       friendId:
- *                         type: integer
- *                         example: 1
- *                 flowers:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties: {}
- *                   example: []
- *                 Missions:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties: {}
- *                   example: []
  *                 wiltedCount:
  *                   type: integer
  *                   description: 시든 꽃 개수
@@ -213,14 +180,14 @@ router.get('/friends', authMiddleware, asyncHandler(memberControllers.getFriends
  *                   description: 핀 꽃 개수
  *                   example: 12
  *                 currentTotalTime:
- *                   type: integer
- *                   description: 현재 회원의 총 집중 시간 (초 단위)
- *                   example: 1732
+ *                   type: string
+ *                   description: 현재 회원의 총 집중 시간 (형식: HH:MM)
+ *                   example: "00:28"
  *                 nextTotalTime:
- *                   type: integer
+ *                   type: string
  *                   nullable: true
- *                   description: 현재 회원보다 높은 집중 시간을 가진 다음 회원의 총 시간 차이 (없으면 null)
- *                   example: null
+ *                   description: 다음 회원과의 집중 시간 차이 (형식: HH:MM, 없으면 "00:00")
+ *                   example: "00:00"
  *       404:
  *         description: 회원 정보 없음
  *       401:
