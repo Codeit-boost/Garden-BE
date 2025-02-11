@@ -79,6 +79,7 @@ setInterval(async () => {
             const data = event.data;
             data.currentFlowerImage = getUpdatedFlowerImage(event.quarter + 1, data.FlowerImage);
             data.now = Date.now();
+            data.index = event.quarter + 1
     
             data.time = convertSecondsToString(Math.floor((Date.now() - new Date(data.createdAt).getTime()) / 1000))
 
@@ -90,7 +91,9 @@ setInterval(async () => {
             const data = event.data;
             data.now = Date.now();
             data.time = data.target_time;
+            data.complete = true
             data.message = "집중 시간 완료"
+            data.index = event.quarter + 1
             sse.broadcast(event.memberId, data)
             focusTimeService.completeFocusTimeById(event.memberId, event.data.id);
           }
