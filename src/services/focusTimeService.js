@@ -72,6 +72,7 @@ const createFocusTime = async (memberId, focusTimeData) => {
 
         return {
             data: {
+                index : 0,
                 id: focusTime.id,
                 category: focusTime.category,
                 target_time: convertSecondsToString(focusTime.targetTime),
