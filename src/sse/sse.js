@@ -52,7 +52,11 @@ const broadcast = (id, data) => {
 
     targetClients.forEach(client => {
         try {
-            client.sseClient.write(`data: ${JSON.stringify(data)}\n\n`);
+            if(data){
+                client.sseClient.write(`data: ${JSON.stringify(data)}\n\n`);
+            }else{
+                client.sseClient.write(":\n\n");
+            }
             console.log(`데이터 전송 성공 (ID: ${id})`);
         } catch (error) {
             console.log(`데이터 전송 실패 (ID: ${id}):`, error);
