@@ -181,13 +181,13 @@ router.get('/friends', authMiddleware, asyncHandler(memberControllers.getFriends
  *                   example: 12
  *                 currentTotalTime:
  *                   type: string
- *                   description: 현재 회원의 총 집중 시간 (형식: HH:MM)
- *                   example: "00:28"
+ *                   description: "현재 회원의 총 집중 시간 (형식: HH:MM)"
+ *                   example: 00:28
  *                 nextTotalTime:
  *                   type: string
  *                   nullable: true
- *                   description: 다음 회원과의 집중 시간 차이 (형식: HH:MM, 없으면 "00:00")
- *                   example: "00:00"
+ *                   description: "다음 회원과의 집중 시간 차이 (형식: HH:MM, 없으면 'null')"
+ *                   example: 00:00
  *       404:
  *         description: 회원 정보 없음
  *       401:
