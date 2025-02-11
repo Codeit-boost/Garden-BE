@@ -7,15 +7,21 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  let token;
 
-  // Authorization 헤더 검증
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new CustomError(ErrorCodes.Unauthorized, 'Unauthorized: Authorization 헤더가 없습니다.');
+  // Authorization 헤더에서 토큰 가져오기
+  const authHeader = req.headers.authorization;
+  
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
 
-  const token = authHeader.split(' ')[1];
+  // httpOnly 쿠키에서 토큰 가져오기 (헤더가 없을 경우)
+  if (!token && req.cookies.access_token) {
+    token = req.cookies.access_token;
+  }
 
+  // 토큰이 없는 경우 에러 반환
   if (!token) {
     throw new CustomError(ErrorCodes.Unauthorized, 'Unauthorized: 토큰이 없습니다.');
   }
