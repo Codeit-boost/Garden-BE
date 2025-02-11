@@ -248,7 +248,7 @@ const endFocusTimeById = async (memberId, focusTimeId) => {
     });
 
     if (!focusTime) {
-        throw new NotFoundError("해당 집중시간 정보가 존재하지 않습니다.");
+        throw new CustomError(ErrorCodes.NotFound, "해당 집중시간 정보가 존재하지 않습니다.");
     }
 
     // 타이머 모드일 경우
