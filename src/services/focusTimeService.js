@@ -216,6 +216,7 @@ const broadcastNowFocusTime =  async (memberId) => {
     }
     
     const data = {
+      index : quarter,
       id: focusTime.id,
       category: focusTime.category,
       target_time: convertSecondsToString(focusTime.targetTime),
