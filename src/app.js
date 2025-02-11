@@ -19,16 +19,12 @@ const allowedOrigins = [
 
 // 미들웨어 설정
 app.use(morgan('dev'));
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    credentials: true, // 쿠키 전송 허용
-}));
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true, // 쿠키 전송 허용
+    })
+);
 
 app.use(express.json());
 app.use(cookieParser());
