@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const { ErrorCodes, CustomError } = require('../utils/error');
 const missionService = require('../services/missionService');   //추가함
 const flowerService = require('../services/flowerService');     //추가함
+const categoryService = require('../services/categoryService')
 
 const KAKAO_CLIENT_ID = process.env.KAKAO_CLIENT_ID;
 const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
@@ -69,6 +70,7 @@ const findOrCreateMember = async(kakaoUserId, nickname, profileImage, email) =>{
     });
     await missionService.setupMission(member.id);   // 미션 초기할당
     await flowerService.setupFlower(member.id);     // 꽃 초기할당
+    await categoryService.setupCategory(member.id)   // 카테고리 초기 할당
   }
 
   return member;

@@ -28,6 +28,9 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
                 const timeSlot = `${Math.floor(hour/3)*3}-${Math.floor(hour/3)*3+3}`;
                 distribution[timeSlot] += focus.time;
             });
+            Object.keys(distribution).forEach(slot => {
+              distribution[slot] = Math.round(distribution[slot] / 60);
+            });
             break;
 
         case 'weekly':
@@ -46,7 +49,7 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
 
             
             Object.keys(distribution).forEach(day => {
-              distribution[day] = Math.round((distribution[day] / 60) * 100) / 100;
+              distribution[day] = Math.round((distribution[day] / 3600) * 100) / 100;
             });
             break;
 
@@ -65,7 +68,7 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
             
             
             Object.keys(distribution).forEach(month => {
-                distribution[month] = Math.round((distribution[month] / 60) * 100) / 100;
+                distribution[month] = Math.round((distribution[month] / 3600) * 100) / 100;
                 // 누적이 완료된 후 한 번에 시간 단위로 변환
             });
             break;

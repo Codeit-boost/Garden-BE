@@ -3,6 +3,20 @@ const { CustomError, ErrorCodes } = require('../utils/error');
 
 const prisma = new PrismaClient();
 
+const setupCategory = async (memberId) => {
+    // 기본 카테고리 배열 (필요에 따라 수정 가능)
+    const defaultCategories = ["공부", "운동", "독서"];
+
+    // 기본 카테고리 생성 (중복 발생 시 건너뛰도록 설정)
+    await prisma.category.createMany({
+        data: defaultCategories.map((name) => ({
+            memberId: Number(memberId),
+            name,
+        })),
+        skipDuplicates: true,
+    });
+};
+
 const myCategories = async(memberId) => {
     try{
         const categories = await prisma.category.findMany({
@@ -104,6 +118,7 @@ const deleteCategory = async(memberId, categoryName) => {
 
 
 module.exports = {
+    setupCategory, 
     myCategories,
     createCategory,
     updateCategory,

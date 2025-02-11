@@ -64,7 +64,7 @@ router.get('', asyncHandler(memberControllers.getMembers));
  * @swagger
  * /api/members/friends:
  *   get:
- *     summary: 내 친구 목록을 집중시간 총합 순으로 페이지네이션 조회
+ *     summary: 나 와 내 친구 목록을 집중시간 총합 순으로 페이지네이션 조회
  *     tags: [Members]
  *     security:
  *       - bearerAuth: []
@@ -296,7 +296,7 @@ router.delete('/me', authMiddleware, asyncHandler(memberControllers.deleteMyAcco
  *           schema:
  *             type: object
  *             properties:
- *               friendId:
+ *               friendEmail:
  *                 type: integer
  *                 example: 2
  *     responses:
