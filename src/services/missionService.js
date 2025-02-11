@@ -4,29 +4,44 @@ const calculateTime = require('../utils/calculateTime');
 
 const prisma = new PrismaClient();
 
-const uncompletedMission = async(memberId) => {
-    try{
-        const missions = await prisma.memberMission.findMany({
-            where: {
-                memberId: Number(memberId),
-                completed: false
-            },
-            include: {
-                mission: {
-                    include: { flower: true }
-                }
-            },
-            orderBy: {
-                mission: {id: 'asc'}
-            },
-        });
-        return missions;
-    }catch(error){
-        throw new CustomError(ErrorCodes.InternalServerError, '사용자의 미션 목록 조회 중 오류가 발생하였습니다.');
+const uncompletedMission = async (memberId) => {
+    try {
+      const missions = await prisma.memberMission.findMany({
+        where: {
+          memberId: Number(memberId),
+        },
+        include: {
+          mission: {
+            include: { flower: true },
+          },
+        },
+        orderBy: {
+          mission: { id: "asc" },
+        },
+      });
+  
+      const missionList = [];
+  
+      missions.forEach((mission) => {
+        const formatMission = {
+          title: mission.mission.title,
+          description: mission.mission.description,
+          type: mission.mission.type,
+          targetValue: mission.mission.targetValue,
+          currentValue: 0,
+          completed: mission.completed,
+          flowerName: mission.mission.flower.name,
+        };
+  
+        missionList.push(formatMission);
+      });
+  
+      return missionList;
+
+    } catch (error) {
+      throw new CustomError(ErrorCodes.InternalServerError,"사용자의 미션 목록 조회 중 오류가 발생하였습니다.");
     }
 };
-
-
 //연속 심기 미션 업데이트(로그인시..?)
 const updateConsecutivePlantingMission = async(memberId) => {
     const today = new Date(new Date().setHours(0, 0, 0, 0));      //시간 자정으로 맞춤
@@ -208,7 +223,7 @@ const setupMission= async(memberId) => {
                 lastUpdated: new Date()
             }))
         });
-        
+
         console.log('미션 초기할당이 완료되었습니다');      //확인용
     }catch(error){
         console.error('미션 초기 생성 중 오류:', error);
