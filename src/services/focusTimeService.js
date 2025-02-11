@@ -228,6 +228,9 @@ const broadcastNowFocusTime =  async (memberId) => {
     }
     sse.broadcast(memberId, data)
   }
+  else{
+    sse.broadcast(memberId, null)
+  }
 }
 
 /**

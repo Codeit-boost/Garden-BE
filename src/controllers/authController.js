@@ -47,6 +47,14 @@ const kakaoCallback = async (req, res) => {
   const redirect_uri = kakaoAuthService.getFrontRedirectURL(req, token);
 
   // 클라이언트의 특정 페이지로 토큰을 전달하며 리다이렉트
+  // `httpOnly` 쿠키 설정
+  res.cookie("access_token", token, {
+    httpOnly: true, // 클라이언트에서 접근 불가
+    secure: false, // HTTPS 환경에서만 전송
+    sameSite: "Lax", // CSRF 보호
+    maxAge: 24 * 60 * 60 * 1000, // 1D
+  });
+
   res.redirect(redirect_uri);
 };
 
