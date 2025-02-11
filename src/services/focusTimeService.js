@@ -110,7 +110,7 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
     });
 
     if (!focusTime) {
-        throw new NotFoundError("해당 집중시간 정보가 존재하지 않습니다.");
+        throw new CustomError(ErrorCodes.NotFound, "해당 집중시간 정보가 존재하지 않습니다.");
     }
 
     // 집중시간 카테고리 정보 수정
