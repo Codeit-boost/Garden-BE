@@ -10,10 +10,23 @@ const cookieParser = require("cookie-parser");
 require("./middlewares/prismaMiddleware");
 
 const app = express();
+const origin = process.env.FRONT_DOMAIN
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    origin
+];
 
 // 미들웨어 설정
 app.use(morgan('dev'));
 app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true, // 쿠키 전송 허용
 }));
 
