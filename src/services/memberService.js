@@ -49,11 +49,11 @@ const getFriendsWithTotalFocusTime = async (myMemberId, page = 1, limit = 10) =>
 
   const results = await prisma.$queryRaw`
     WITH friend_ids AS (
+      -- 나 자신
+      SELECT ${myMemberId} AS id
+      UNION
       -- 내가 추가한 친구들의 ID
       SELECT "friendId" AS id FROM "MemberFriend" WHERE "memberId" = ${myMemberId}
-      UNION
-      -- 나를 친구로 추가한 친구들의 ID
-      SELECT "memberId" AS id FROM "MemberFriend" WHERE "friendId" = ${myMemberId}
     )
     SELECT
       m.id,
@@ -158,6 +158,7 @@ const deleteMemberAccount = async (memberId) => {
 };
 
 const addFriend = async (memberId, friendId) => {
+  // 이미 친구인지
   const existingRequest = await prisma.memberFriend.findUnique({
     where: {
       memberId_friendId: {
@@ -168,12 +169,49 @@ const addFriend = async (memberId, friendId) => {
   });
 
   if (existingRequest) {
-    throw new CustomError(
-      ErrorCodes.BadRequest,
-      'Friend request already exists or you are already friends.'
+    throw new CustomError(ErrorCodes.BadRequest,'이미 친구 요청을 보냈거나, 이미 친구 관계입니다.'
     );
   }
 
+  // 친구 관계를 생성합니다.
+  return await prisma.memberFriend.create({
+    data: {
+      memberId,
+      friendId,
+    },
+  });
+};
+
+const addFriendByEmail = async (memberId, friendEmail) => {
+  // 이메일 -> 친구 계정
+  const friendUser = await prisma.member.findUnique({
+    where: {
+      email: friendEmail,
+    },
+  });
+
+  if (!friendUser) {
+    throw new CustomError(ErrorCodes.NotFound,'해당 이메일의 사용자를 찾을 수 없습니다.');
+  }
+
+  const friendId = friendUser.id;
+
+  // 이미 친구인지
+  const existingRequest = await prisma.memberFriend.findUnique({
+    where: {
+      memberId_friendId: {
+        memberId,
+        friendId,
+      },
+    },
+  });
+
+  if (existingRequest) {
+    throw new CustomError(ErrorCodes.BadRequest,'이미 친구 요청을 보냈거나, 이미 친구 관계입니다.'
+    );
+  }
+
+  // 친구 관계를 생성합니다.
   return await prisma.memberFriend.create({
     data: {
       memberId,
@@ -200,5 +238,6 @@ module.exports = {
   updateMemberInfo,
   deleteMemberAccount,
   addFriend,
+  addFriendByEmail,
   deleteFriend,
 };

@@ -17,7 +17,6 @@ const calculateElapsedTime = (createdAt, targetTime) => {
     return Math.floor(elapsedTime);
 };
 
-
 /**
  * 시간을 초 단위에서 HH:MM:SS 형태로 변환하는 함수
  */
@@ -29,7 +28,6 @@ const convertSecondsToString = (time) => {
     
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
-
 
 /**
  * 시간을 HH:MM:SS 형태에서 초 단위로 변환하는 함수
@@ -45,7 +43,6 @@ const convertStringToSeconds = (time) => {
 
     return totalSeconds;
 };
-
 
 /**
  * 전체 시간에서 시간만 반환하는 함수

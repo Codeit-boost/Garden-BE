@@ -12,7 +12,6 @@ const getMissions = async(req, res, next) => {
   }
 };
 
-
- module.exports = {
-    getMissions,
- };
+module.exports = {
+  getMissions,
+};

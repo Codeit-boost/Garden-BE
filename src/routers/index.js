@@ -71,6 +71,6 @@ router.use("/statistic", statisticRouters);
  *   name: Category
  *   description: 카테고리 관련 API
  */
-router.use("/category", categoryRouters);
+router.use("/categories", categoryRouters);
 
 module.exports = router;

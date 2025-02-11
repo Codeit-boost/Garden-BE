@@ -58,11 +58,21 @@ const deleteMyAccount = async (req, res) => {
 
 // 친구 추가
 const makeFriend = async (req, res) => {
-  const { friendId } = req.body;
+  const { friendEmail,friendId } = req.body;
   const memberId = req.user.id;
-
-  const friendRequest = await memberService.addFriend(memberId, friendId);
-  res.status(201).json({ message: 'Friend request sent successfully.', friendRequest });
+  
+  if(friendId){
+    const friendRequest = await memberService.addFriend(memberId, friendId);
+    res.status(201).json({ message: '친구요청이 성공적으로 완료되었습니다.', friendRequest });
+  }
+  else if(friendEmail){
+    const friendRequest = await memberService.addFriendByEmail(memberId, friendEmail);
+    res.status(201).json({ message: '친구요청이 성공적으로 완료되었습니다.', friendRequest });
+  }
+  else{
+    // 둘 다 없으면 에러 응답
+    return res.status(400).json({ message: '친구 추가에 필요한 정보가 없습니다.' });
+  }
 };
 
 // 친구 삭제
