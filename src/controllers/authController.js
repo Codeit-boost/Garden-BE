@@ -51,7 +51,7 @@ const kakaoCallback = async (req, res) => {
   res.cookie("access_token", token, {
     httpOnly: true, // 클라이언트에서 접근 불가
     secure: false, // HTTPS 환경에서만 전송
-    sameSite: "Lax", // CSRF 보호
+    sameSite: "None", // CSRF 보호
     maxAge: 24 * 60 * 60 * 1000, // 1D
   });
 
