@@ -208,6 +208,7 @@ const setupMission= async(memberId) => {
                 lastUpdated: new Date()
             }))
         });
+        
         console.log('미션 초기할당이 완료되었습니다');      //확인용
     }catch(error){
         console.error('미션 초기 생성 중 오류:', error);
