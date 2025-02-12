@@ -1,6 +1,9 @@
 const { PrismaClient, MissionType } = require("@prisma/client");
-
 const prisma = new PrismaClient();
+
+const missionService = require('../services/missionService');  
+const flowerService = require('../services/flowerService');     
+const categoryService = require('../services/categoryService');
 
 // 미션 생성 함수
 const generateMockMissions = async() => {
@@ -27,18 +30,18 @@ const generateMockMissions = async() => {
 // 꽃 생성 함수
 const generateMockFlowers = async() => {
     const flowers = [
-        {name: '장미', language: '사랑, 열정', IMG: '이미지_URL'},                 
-        {name: '해바라기', language: '희망, 기다림, 숭배', IMG: '이미지_URL'},         
-        {name: '메리골드', language: '반드시 오고야 말 행복', IMG: '이미지_URL'},      
-        {name: '초롱꽃', language: '인도, 침묵', IMG: '이미지_URL'},
-        {name: '코스모스', language: '소녀의 순결, 순정', IMG: '이미지_URL'},
-        {name: '수선화', language: '자존심, 고결, 신비', IMG: '이미지_URL'},
-        {name: '물망초', language: '날 잊지 마세요, 진실한 사랑', IMG: '이미지_URL'},
-        {name: '능소화', language: '명예, 영광', IMG: '이미지_URL'},
-        {name: '제비꽃', language: '순진한 사랑', IMG: '이미지_URL'},
-        {name: '라벤더', language: '정절, 침묵', IMG: '이미지_URL'},
-        {name: '도라지꽃', language: '영원한 사랑', IMG: '이미지_URL'},
-        {name: '히아신스', language: '유희, 겸손한 사랑', IMG: '이미지_URL'},
+        {name: '장미', language: '사랑, 열정', IMG: 'https://garden-c.kro.kr/images/1.png'},                 
+        {name: '해바라기', language: '희망, 기다림, 숭배', IMG: 'https://garden-c.kro.kr/images/2.png'},         
+        {name: '메리골드', language: '반드시 오고야 말 행복', IMG: 'https://garden-c.kro.kr/images/3.png'},      
+        {name: '초롱꽃', language: '인도, 침묵', IMG: 'https://garden-c.kro.kr/images/4.png'},
+        {name: '코스모스', language: '소녀의 순결, 순정', IMG: 'https://garden-c.kro.kr/images/5.png'},
+        {name: '수선화', language: '자존심, 고결, 신비', IMG: 'https://garden-c.kro.kr/images/6.png'},
+        {name: '물망초', language: '날 잊지 마세요, 진실한 사랑', IMG: 'https://garden-c.kro.kr/images/7.png'},
+        {name: '능소화', language: '명예, 영광', IMG: 'https://garden-c.kro.kr/images/8.png'},
+        {name: '제비꽃', language: '순진한 사랑', IMG: 'https://garden-c.kro.kr/images/9.png'},
+        {name: '라벤더', language: '정절, 침묵', IMG: 'https://garden-c.kro.kr/images/10.png'},
+        {name: '도라지꽃', language: '영원한 사랑', IMG: 'https://garden-c.kro.kr/images/11.png'},
+        {name: '히아신스', language: '유희, 겸손한 사랑', IMG: 'https://garden-c.kro.kr/images/12.png'},
     ];
 
     for(const flower of flowers){
@@ -52,6 +55,21 @@ const generateMockFlowers = async() => {
     }
 };
 
+const assignDefaultToMember = async () => {
+    try {
+      members = await prisma.member.findMany();
+
+      members.forEach(member => {
+        missionService.setupMission(member.id);
+        flowerService.setupFlower(member.id);
+        categoryService.setupCategory(member.id)
+      });
+
+    } catch (error) {
+      console.error('기본 꽃 할당 중 에러 발생:', error);
+      throw error;
+    }
+  };
 
 const generateMockData = async() => {
     try{
@@ -68,6 +86,7 @@ const generateMockData = async() => {
         //새 데이터 생성
         await generateMockFlowers();            //꽃 먼저 생성
         await generateMockMissions();
+        await assignDefaultToMember();
 
         console.log('Mock data generation completed successfully');
     }catch(error){
