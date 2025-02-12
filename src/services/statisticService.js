@@ -24,12 +24,16 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
             };
             
             focusTimes.forEach(focus => {
-                const hour = focus.createdAt.getHours();
+                // UTC -> KST 변환 (UTC + 9시간)
+                const kstDate = new Date(focus.createdAt.getTime() + 9 * 60 * 60 * 1000);
+                const hour = kstDate.getHours();
                 const timeSlot = `${Math.floor(hour/3)*3}-${Math.floor(hour/3)*3+3}`;
                 distribution[timeSlot] += focus.time;
             });
+            
+            // 초 -> 분 변환
             Object.keys(distribution).forEach(slot => {
-              distribution[slot] = Math.round(distribution[slot] / 60);
+                distribution[slot] = Math.round(distribution[slot] / 60);
             });
             break;
 
@@ -40,16 +44,17 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
                 '금': 0, '토': 0, '일': 0
             };
             
-
             focusTimes.forEach(focus => {
-                const day = focus.createdAt.getDay();
+                // UTC -> KST 변환
+                const kstDate = new Date(focus.createdAt.getTime() + 9 * 60 * 60 * 1000);
+                const day = kstDate.getDay();
                 const days = ['일', '월', '화', '수', '목', '금', '토'];
                 distribution[days[day]] += focus.time;
             });
-
             
+            // 초 -> 시간 변환
             Object.keys(distribution).forEach(day => {
-              distribution[day] = Math.round((distribution[day] / 3600) * 100) / 100;
+                distribution[day] = Math.round((distribution[day] / 3600) * 100) / 100;
             });
             break;
 
@@ -61,19 +66,18 @@ const getTimeDistribution = async (memberId, type, startDate, endDate) => {
             }
             
             focusTimes.forEach(focus => {
-                const month = focus.createdAt.getMonth() + 1;
+                // UTC -> KST 변환
+                const kstDate = new Date(focus.createdAt.getTime() + 9 * 60 * 60 * 1000);
+                const month = kstDate.getMonth() + 1;
                 distribution[month] += focus.time;
-                // 분 단위를 시간 단위로 변환
             });
             
-            
+            // 초 -> 시간 변환
             Object.keys(distribution).forEach(month => {
                 distribution[month] = Math.round((distribution[month] / 3600) * 100) / 100;
-                // 누적이 완료된 후 한 번에 시간 단위로 변환
             });
             break;
     }
-
 
     return distribution;
 };
