@@ -11,11 +11,11 @@ const findUnlockedFlowers = async(memberId) => {
             where: { memberId: Number(memberId) },
             include: {
                 flower: {
-                select: {
-                    id: true,
-                    name: true,
-                    FlowerImg: true,
-                },
+                    select: {
+                        id: true,
+                        name: true,
+                        FlowerImg: true,
+                    },
                 },
             },
         });
@@ -35,6 +35,8 @@ const findUnlockedFlowers = async(memberId) => {
             }
             return a.unlocked ? -1 : 1;
         });
+
+        return result
 
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '잠금 해제된 꽃 목록 조회 중 오류가 발생했습니다.');
