@@ -21,74 +21,27 @@ const uncompletedMission = async (memberId) => {
       });
   
       const missionList = [];
-      
-      for (const mission of missions){
-        const currentValue = await calculateCurrentValue(memberId, mission);
-        const completed = currentValue >= mission.mission.targetValue;
-        
+  
+      missions.forEach((mission) => {
         const formatMission = {
-            title: mission.mission.title,
-            description: mission.mission.description,
-            type: mission.mission.type,
-            targetValue: mission.mission.targetValue,
-            currentValue: currentValue,
-            completed,
-            flowerName: mission.mission.flower.name,
+          title: mission.mission.title,
+          description: mission.mission.description,
+          type: mission.mission.type,
+          targetValue: mission.mission.targetValue,
+          currentValue: 0,
+          completed: mission.completed,
+          flowerName: mission.mission.flower.name,
         };
-
+  
         missionList.push(formatMission);
-      }
-        return missionList;
+      });
+  
+      return missionList;
+
     } catch (error) {
-      console.error(error);
       throw new CustomError(ErrorCodes.InternalServerError,"사용자의 미션 목록 조회 중 오류가 발생하였습니다.");
     }
 };
-
-//current value 계산 함수
-const calculateCurrentValue = async (memberId, mission) => {
-    switch(mission.mission.type){
-        case 'CONSECUTIVE_PLANTING':
-            return await calculateConsecutivePlantingMissionValue(mission);
-        case 'FOCUS_TIME':
-            return await calculateFocusTimeMissionValue(memberId);
-        case 'TOTAL_FLOWERS':
-            return await calculateTotalFlowersMissionValue(memberId);
-        default:
-            return 0;
-    }
-}
-
-//연속 심기 미션 currentValue 계산
-const calculateConsecutivePlantingMissionValue = async(mission) => {
-    const today = new Date(new Date().setHours(0, 0, 0, 0));
-    const startDate = mission.startDate ? new Date(new Date(mission.startDate).setHours(0, 0, 0, 0)) : null;
-    value = startDate?Math.floor((today - startDate) / (24 * 60 * 60 * 1000)): 0;
-    return value;
-}
-
-//집중시간 미션 currentValue 계산
-const calculateFocusTimeMissionValue = async(memberId) => {
-    const maxFocusedTime = await prisma.focusTime.findFirst({
-        where: { memberId },
-        orderBy: { time: 'desc' },
-        select: { time: true }
-    });
-
-    return calculateTime.convertTimeToHours(maxFocusedTime?.focusTime || 0);
-}
-
-//심은꽃 미션 currentValue 계산
-const calculateTotalFlowersMissionValue = async(memberId) => {
-    const uniqueFlowers = await prisma.focusTime.findMany({
-        where: { memberId },
-        select: { flowerId: true},
-        distinct: ['flowerId'],
-    });
-    return uniqueFlowers.length;
-}
-
-
 //연속 심기 미션 업데이트(로그인시..?)
 const updateConsecutivePlantingMission = async(memberId) => {
     const today = new Date(new Date().setHours(0, 0, 0, 0));      //시간 자정으로 맞춤
@@ -208,7 +161,12 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
 // 심은 꽃 미션(새로운 꽃 심을 경우-집중 시간 저장 시)
 const updateTotalFlowerMission = async(memberId) => {
     try{
-        const cntUniqueFlowers = calculateTotalFlowersMissionValue(memberId);  //심은 꽃 개수
+        const uniqueFlowers = await prisma.focusTime.findMany({
+            where: { memberId: memberId},
+                select: { flowerId: true },
+                distinct: ['flowerId'],
+        });
+        const cntUniqueFlowers = uniqueFlowers.length;  //심은 꽃 개수
     
         const flowerMissions = await prisma.memberMission.findMany({
         where: {
