@@ -6,17 +6,36 @@ const prisma = new PrismaClient();
 
 const findUnlockedFlowers = async(memberId) => {
     try{
-        const unlockedFlowers = await prisma.memberFlower.findMany({
-            where: {
-                memberId: Number(memberId),
-                unlocked: true
+        // 모든 꽃
+        const memberFlowers = await prisma.memberFlower.findMany({
+            where: { memberId: Number(memberId) },
+            include: {
+                flower: {
+                select: {
+                    id: true,
+                    name: true,
+                    FlowerImg: true,
+                },
+                },
             },
-            include:{
-                flower: true
+        });
+    
+        // 필요한 부분만
+        const result = memberFlowers.map((mf) => ({
+            id: mf.flower.id,
+            name: mf.flower.name,
+            FlowerImg: mf.flower.FlowerImg,
+            unlocked: mf.unlocked,
+        }));
+    
+        // unlocked가 true인 항목이 먼저 나오고, 동일할 경우 id 오름차순으로 정렬합니다.
+        result.sort((a, b) => {
+            if (a.unlocked === b.unlocked) {
+                return a.id - b.id;
             }
+            return a.unlocked ? -1 : 1;
         });
 
-        return unlockedFlowers;
     }catch(error){
         throw new CustomError(ErrorCodes.InternalServerError, '잠금 해제된 꽃 목록 조회 중 오류가 발생했습니다.');
     }
@@ -45,7 +64,7 @@ const setupFlower = async(memberId) => {
         await prisma.memberFlower.updateMany({
             where: {
                 memberId,
-                flowerId: { in: [1, 2, 3] }
+                flowerId: { in: [1, 2] }
             },
             data: { unlocked: true },
         });
