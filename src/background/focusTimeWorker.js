@@ -130,6 +130,7 @@ setInterval(async () => {
             
           const data = event.data;
           data.currentFlowerImage = getUpdatedFlowerImage(data.quarter + 1, data.FlowerImage);
+          data.index = event.quarter + 1
           data.now = Date.now();
   
           data.time = convertSecondsToString(Math.floor((Date.now() - new Date(data.createdAt).getTime())/1000))
