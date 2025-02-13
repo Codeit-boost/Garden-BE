@@ -229,7 +229,8 @@ const broadcastNowFocusTime =  async (memberId) => {
   //     createdAt: focusTime.createdAt,
   //     now: now
   //   }
-  const data = getEventData(memberId);
+  const data = await getEventData(memberId);
+
   if(data){
     sse.broadcast(memberId, data)
   }
