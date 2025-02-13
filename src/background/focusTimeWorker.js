@@ -58,6 +58,34 @@ const removeEventsByMemberId = async (memberId) => {
   }
 };
 
+const getEventData = async (memberId) => {
+  try {
+    // SCHEDULE_KEY에 저장된 모든 이벤트
+    const events = await redisClient.zRange(SCHEDULE_KEY, 0, -1);
+
+    // 모든 이벤트를 JSON 파싱 후, memberId가 일치하는 이벤트만 필터링
+    const memberEvents = events
+      .map(eventStr => JSON.parse(eventStr))
+      .filter(event => event.memberId === memberId);
+
+    if (memberEvents.length === 0) {
+      console.log(`memberId ${memberId}에 해당하는 이벤트가 없습니다.`);
+      return null;
+    }
+
+    // 해당 회원의 이벤트 중 첫 번째 이벤트의 data 값을 반환
+    const data = memberEvents[0].data;
+    data.now = Date.now();
+    data.time = convertSecondsToString(Math.floor((Date.now() - new Date(data.createdAt).getTime()) / 1000))
+
+    return data
+
+  } catch (error) {
+    console.error("회원 이벤트 data 값을 가져오는 중 오류 발생:", error);
+    throw error;
+  }
+};
+
 // 1초마다 레디스의 시간 기준으로 로직 실행
 setInterval(async () => {
   try {
@@ -124,5 +152,6 @@ setInterval(async () => {
 
 module.exports = {
   scheduleFocusTimeEvent,
+  getEventData,
   removeEventsByMemberId,
 };

@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { calculateElapsedTime, convertSecondsToString, convertStringToSeconds } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage,getWitherImg } = require("../utils/updateFlowerImage.js");
+const { getEventData } = require("../background/focusTimeWorker")
 const { updateState } = require("../utils/updateFocusTimeState.js");
 const { ErrorCodes, CustomError } = require('../utils/error');
 const sse = require("../sse/sse.js");
@@ -188,46 +189,48 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
 // };
 
 const broadcastNowFocusTime =  async (memberId) => {
-  // focusTimeId에 해당하는 집중시간 객체 탐색
-  const focusTime = await prisma.focusTime.findFirst({
-    where: { 
-      memberId: memberId,
-      state: "IN_PROGRESS"  
-    },
-    include: {
-      flower: true,
-      member: true
-    }
-  });
+  // // focusTimeId에 해당하는 집중시간 객체 탐색
+  // const focusTime = await prisma.focusTime.findFirst({
+  //   where: { 
+  //     memberId: memberId,
+  //     state: "IN_PROGRESS"  
+  //   },
+  //   include: {
+  //     flower: true,
+  //     member: true
+  //   }
+  // });
 
-  if(focusTime){ 
-    // 서버와 클라이언트 시간 동기화를 위해 현재 서버 시간을 넘겨줌
-    const now = Date.now();
+  // if(focusTime){ 
+  //   // 서버와 클라이언트 시간 동기화를 위해 현재 서버 시간을 넘겨줌
+  //   const now = Date.now();
     
-    const time = Math.floor((now - focusTime.createdAt.getTime()) / 1000);
+  //   const time = Math.floor((now - focusTime.createdAt.getTime()) / 1000);
 
-    let quarter; 
+  //   let quarter; 
 
-    // 몇번쨰 이미지 인지 체크
-    if(focusTime.targetTime == 0){
-      quarter =  Math.floor(time / parseInt(STOPWATCH,10)) 
-    }else{
-      quarter = Math.floor((time / focusTime.targetTime) * 4) + 1;
-    }
+  //   // 몇번쨰 이미지 인지 체크
+  //   if(focusTime.targetTime == 0){
+  //     quarter =  Math.floor(time / parseInt(STOPWATCH,10)) 
+  //   }else{
+  //     quarter = Math.floor((time / focusTime.targetTime) * 4) + 1;
+  //   }
     
-    const data = {
-      index : quarter,
-      id: focusTime.id,
-      category: focusTime.category,
-      target_time: convertSecondsToString(focusTime.targetTime),
-      time: convertSecondsToString(time),
-      currentFlowerImage: getUpdatedFlowerImage(quarter, focusTime.flower.FlowerImg),
-      FlowerImage: focusTime.flower.FlowerImg,
-      FlowerName: focusTime.flower.name,
-      member_id: focusTime.memberId,
-      createdAt: focusTime.createdAt,
-      now: now
-    }
+  //   const data = {
+  //     index : quarter,
+  //     id: focusTime.id,
+  //     category: focusTime.category,
+  //     target_time: convertSecondsToString(focusTime.targetTime),
+  //     time: convertSecondsToString(time),
+  //     currentFlowerImage: getUpdatedFlowerImage(quarter, focusTime.flower.FlowerImg),
+  //     FlowerImage: focusTime.flower.FlowerImg,
+  //     FlowerName: focusTime.flower.name,
+  //     member_id: focusTime.memberId,
+  //     createdAt: focusTime.createdAt,
+  //     now: now
+  //   }
+  const data = getEventData(memberId);
+  if(data){
     sse.broadcast(memberId, data)
   }
   else{
