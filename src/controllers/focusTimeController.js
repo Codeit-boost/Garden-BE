@@ -2,7 +2,7 @@ const focusTimeService = require("../services/focusTimeService.js");
 const s = require("superstruct");
 const { CreateFocusTime, UpdateFocusTimeCategory } = require("../struct/focusTimeStruct.js");
 const sse = require("../sse/sse.js");
-const { scheduleFocusTimeEvent ,removeEventsByMemberId} = require("../background/focusTimeWorker")
+const { scheduleFocusTimeEvent, getEventData,removeEventsByMemberId} = require("../background/focusTimeWorker")
 
 /**
  * 집중시간 생성
@@ -100,9 +100,10 @@ const focusTimeSSE = async (req, res, next) => {
     // 새로운 클라이언트 연결 추가
     userId = req.user.id;
     await sse.addClient(userId, res);
+    const data = await getEventData(userId);
 
     // sse 최초 연결 시 현재 진행중인 집중시간 조회
-    await focusTimeService.broadcastNowFocusTime(userId);
+    await focusTimeService.broadcastNowFocusTime(userId,data);
 };
 
 

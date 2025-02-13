@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { calculateElapsedTime, convertSecondsToString, convertStringToSeconds } = require("../utils/calculateTime.js");
 const { getUpdatedFlowerImage,getWitherImg } = require("../utils/updateFlowerImage.js");
-const { getEventData } = require("../background/focusTimeWorker")
 const { updateState } = require("../utils/updateFocusTimeState.js");
 const { ErrorCodes, CustomError } = require('../utils/error');
 const sse = require("../sse/sse.js");
@@ -29,7 +28,7 @@ const initFocusTimes = async () => {
   );
 };
 
-// initFocusTimes();
+initFocusTimes();
 
 /**
  * 집중시간 생성
@@ -188,7 +187,7 @@ const updateFocusTimeCategoryById = async (focusTimeId, updatedFocusTimeCategory
 //     return (await Promise.all(updates)).filter((update) => update !== null);
 // };
 
-const broadcastNowFocusTime =  async (memberId) => {
+const broadcastNowFocusTime =  async (memberId, data) => {
   // // focusTimeId에 해당하는 집중시간 객체 탐색
   // const focusTime = await prisma.focusTime.findFirst({
   //   where: { 
@@ -229,8 +228,6 @@ const broadcastNowFocusTime =  async (memberId) => {
   //     createdAt: focusTime.createdAt,
   //     now: now
   //   }
-  const data = await getEventData(memberId);
-
   if(data){
     sse.broadcast(memberId, data)
   }
