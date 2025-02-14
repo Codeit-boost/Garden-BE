@@ -62,15 +62,35 @@ const uncompletedMission = async (memberId) => {
 
 //연속 심기 미션 업데이트(로그인시..?)
 const updateConsecutivePlantingMission = async(memberId) => {
-    const today = new Date(new Date().setHours(0, 0, 0, 0));      //시간 자정으로 맞춤
+    // UTC 시간을 KST로 변환 (UTC+9)
+    const now = new Date();
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const today = new Date(new Date(now.getTime() + kstOffset).setHours(0, 0, 0, 0));
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
   
     try{
+        // DB의 UTC 시간을 KST 기준으로 조회
+        const todayPlantings = await prisma.flower.count({
+            where: {
+                memberId: Number(memberId),
+                createdAt: {
+                    // UTC로 변환하여 쿼리
+                    gte: new Date(today.getTime() - kstOffset),
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000 - kstOffset),
+                },
+            },
+        });
+
+        // 오늘 심은 꽃이 없으면 미션 업데이트하지 않음
+        if (todayPlantings === 0) {
+            return [];
+        }
+
         const missions = await prisma.memberMission.findMany({
             where: {
                 memberId,
                 mission: { type: 'CONSECUTIVE_PLANTING' },
-                NOT: { lastUpdated: { gte: new Date(today) } },   //오늘 이미 갱신된 미션 제외
+                NOT: { lastUpdated: { gte: today } },   //오늘 이미 갱신된 미션 제외
                 completed: false,
             },
             include: {mission: { include: { flower: true } } },
@@ -79,61 +99,71 @@ const updateConsecutivePlantingMission = async(memberId) => {
         const completedMissions = [];
     
         for (const plantingMission of missions){
-            let reset = false;
-    
+            // DB의 UTC 시간을 KST로 변환
+            const lastUpdated = plantingMission.lastUpdated ? 
+                new Date(plantingMission.lastUpdated.getTime() + kstOffset) : null;
+            const startDate = plantingMission.startDate ? 
+                new Date(plantingMission.startDate.getTime() + kstOffset) : null;
+            
             //날짜 계산 편하게 자정으로 다 맞춤
-            const lastUpdated = plantingMission.lastUpdated? new Date(new Date(plantingMission.lastUpdated).setHours(0, 0, 0, 0)) : null;
-            const startDate = plantingMission.startDate? new Date(new Date(plantingMission.startDate).setHours(0, 0, 0, 0)) : null;
-    
-            //마지막 업데이트가 어제 이전이면 연속심기 초기화
-            if(!lastUpdated || lastUpdated < yesterday ){
-            reset = true;
+            if (lastUpdated) lastUpdated.setHours(0, 0, 0, 0);
+            if (startDate) startDate.setHours(0, 0, 0, 0);
+
+            let reset = false;
+            
+            //마지막 업데이트가 어제가 아니면 연속심기 초기화
+            if (!lastUpdated || lastUpdated.getTime() !== yesterday.getTime()) {
+                reset = true;
             }
-            if(reset || !startDate){
-            //미션 초기화 또는 새로 시작
-            await prisma.memberMission.update({
-                where: {id :plantingMission.id},
-                data: {
-                    startDate: today,
-                    completed: false,
-                    lastUpdated: today,
-                },
-            });
-            }else{
-            //연속심기 미션 완료한 경우
-            const days = startDate?Math.floor((today - startDate) / (24 * 60 * 60 * 1000)): 0; //연속 일자
-            if(days >= plantingMission.mission.targetValue -1){
-                await prisma.memberMission.update({
-                where: {id: plantingMission.id},
-                data: {
-                    completed: true,
-                    lastUpdated: today,
-                },
-                });
-                await missionUtils.unlockFlower(memberId, plantingMission.mission.flower.id);
-                completedMissions.push({
-                    missionId: plantingMission.id,
-                    flower: plantingMission.mission.flower?
-                    {
-                        name: plantingMission.mission.flower.name, 
-                        FlowerImg: plantingMission.mission.flower.FlowerImg
-                    } : null      //해당 미션으로 깨지는 꽃이 없는 경우 'null'반환
-                });
-            }else{
-                //연속 심기 진행 중이지만 아직 완료되지 않은 경우
+
+            if (reset || !startDate) {
+                //미션 초기화 또는 새로 시작
                 await prisma.memberMission.update({
                     where: {id: plantingMission.id},
                     data: {
-                        lastUpdated: today,       //lastUpdated만 업데이트
+                        // KST를 다시 UTC로 변환하여 저장
+                        startDate: new Date(today.getTime() - kstOffset),
+                        completed: false,
+                        lastUpdated: new Date(today.getTime() - kstOffset),
                     },
                 });
-            }
+            } else {
+                const days = Math.floor((today - startDate) / (24 * 60 * 60 * 1000)) + 1;
+                
+                if (days >= plantingMission.mission.targetValue) {
+                    //연속심기 미션 완료한 경우
+                    await prisma.memberMission.update({
+                        where: {id: plantingMission.id},
+                        data: {
+                            completed: true,
+                            // KST를 다시 UTC로 변환하여 저장
+                            lastUpdated: new Date(today.getTime() - kstOffset),
+                        },
+                    });
+                    await missionUtils.unlockFlower(memberId, plantingMission.mission.flower.id);
+                    completedMissions.push({
+                        missionId: plantingMission.id,
+                        flower: plantingMission.mission.flower ? {
+                            name: plantingMission.mission.flower.name, 
+                            FlowerImg: plantingMission.mission.flower.FlowerImg
+                        } : null //해당 미션으로 깨지는 꽃이 없는 경우 'null'반환
+                    });
+                } else {
+                    //연속 심기 진행 중이지만 아직 완료되지 않은 경우
+                    await prisma.memberMission.update({
+                        where: {id: plantingMission.id},
+                        data: {
+                            // KST를 다시 UTC로 변환하여 저장
+                            lastUpdated: new Date(today.getTime() - kstOffset),
+                        },
+                    });
+                }
             }
         }
         //console.log(completedMissions);     //점검용
-        return completedMissions;       //완료한 미션 반환
-    }catch(error){
-        throw new CustomError(ErrorCodes.InternalServerError, '연속 미션 업데이트 중 오류가 발생하였습니다.');
+        return completedMissions;
+    } catch(error) {
+        throw new CustomError(ErrorCodes.InternalServerError, '연속 심기기 미션 업데이트 중 오류가 발생하였습니다.');
     }
 };
   
