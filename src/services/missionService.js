@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { CustomError, ErrorCodes } = require('../utils/error');
-const calculateTime = require('../utils/calculateTime');
+const missionUtils = require('../utils/missionUtils');
 
 const prisma = new PrismaClient();
 
@@ -9,6 +9,7 @@ const uncompletedMission = async (memberId) => {
       const missions = await prisma.memberMission.findMany({
         where: {
           memberId: Number(memberId),
+          completed: false,
         },
         include: {
           mission: {
@@ -20,73 +21,54 @@ const uncompletedMission = async (memberId) => {
         },
       });
   
-      const missionList = [];
+      const uncompletedMissionList = [];
+      const completedMissionList = [];
       
       for (const mission of missions){
-        const currentValue = await calculateCurrentValue(memberId, mission);
+        const currentValue = await missionUtils.calculateCurrentValue(memberId, mission);
         const completed = currentValue >= mission.mission.targetValue;
         
-        const formatMission = {
-            title: mission.mission.title,
-            description: mission.mission.description,
-            type: mission.mission.type,
-            targetValue: mission.mission.targetValue,
-            currentValue: currentValue,
-            completed,
-            flowerName: mission.mission.flower.name,
-        };
+        //완료된 미션
+        if(completed){
+            //완료처리
+            await prisma.memberMission.update({
+                where: {id: mission.id},
+                data: {
+                    completed: true,
+                    lastUpdated: new Date(),
+                },
+            });
+            //꽃 해제
+            missionUtils.unlockFlower(memberId, mission.mission.flower.id);
 
-        missionList.push(formatMission);
-      }
-        return missionList;
+            completedMissionList.push({
+                missionId: mission.id,
+                flower: mission.mission.flower?
+                {
+                    name: mission.mission.flower.name, 
+                    FlowerImg: mission.mission.flower.FlowerImg
+                } : null
+            });
+        }else{
+            //완료X미션
+            const formatMission = {
+                title: mission.mission.title,
+                description: mission.mission.description,
+                type: mission.mission.type,
+                targetValue: mission.mission.targetValue,
+                currentValue: currentValue,
+                completed,
+                flowerName: mission.mission.flower.name,
+            };
+
+            uncompletedMissionList.push(formatMission);
+        }}
+        return { completedMissions: completedMissionList, uncompletedMissions: uncompletedMissionList };
     } catch (error) {
       console.error(error);
       throw new CustomError(ErrorCodes.InternalServerError,"사용자의 미션 목록 조회 중 오류가 발생하였습니다.");
     }
 };
-
-//current value 계산 함수
-const calculateCurrentValue = async (memberId, mission) => {
-    switch(mission.mission.type){
-        case 'CONSECUTIVE_PLANTING':
-            return await calculateConsecutivePlantingMissionValue(mission);
-        case 'FOCUS_TIME':
-            return await calculateFocusTimeMissionValue(memberId);
-        case 'TOTAL_FLOWERS':
-            return await calculateTotalFlowersMissionValue(memberId);
-        default:
-            return 0;
-    }
-}
-
-//연속 심기 미션 currentValue 계산
-const calculateConsecutivePlantingMissionValue = async(mission) => {
-    const today = new Date(new Date().setHours(0, 0, 0, 0));
-    const startDate = mission.startDate ? new Date(new Date(mission.startDate).setHours(0, 0, 0, 0)) : null;
-    value = startDate?Math.floor((today - startDate) / (24 * 60 * 60 * 1000)): 0;
-    return value;
-}
-
-//집중시간 미션 currentValue 계산
-const calculateFocusTimeMissionValue = async(memberId) => {
-    const maxFocusedTime = await prisma.focusTime.findFirst({
-        where: { memberId },
-        orderBy: { time: 'desc' },
-        select: { time: true }
-    });
-
-    return calculateTime.convertTimeToHours(maxFocusedTime?.focusTime || 0);
-}
-
-//심은꽃 미션 currentValue 계산
-const calculateTotalFlowersMissionValue = async(memberId) => {
-    const uniqueFlowers = await prisma.focusTime.findMany({
-        where: { memberId },
-        select: { flowerId: true},
-        distinct: ['flowerId'],
-    });
-    return uniqueFlowers.length;
-}
 
 
 //연속 심기 미션 업데이트(로그인시..?)
@@ -139,6 +121,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
                     lastUpdated: today,
                 },
                 });
+                missionUtils.unlockFlower(memberId, plantingMission.mission.flower.id);
                 completedMissions.push({
                     missionId: plantingMission.id,
                     flower: plantingMission.mission.flower?
@@ -167,10 +150,12 @@ const updateConsecutivePlantingMission = async(memberId) => {
   
 
 //집중 시간 미션(집중 시간 저장 시)
-const updateFocusTimeMission = async(memberId, focusTime) => {
-    const focusedTime = calculateTime.convertTimeToHours(focusTime);
-    
+const updateFocusTimeMission = async(memberId) => {
     try{
+        //현재까지의 총 누적 집중시간
+        const totalFocusedTime = await missionUtils.calculateFocusTimeMissionValue(memberId);
+
+        //완료되지 않은 집중시간 미션 조회
         const missions = await prisma.memberMission.findMany({
         where: {
             memberId,
@@ -183,11 +168,12 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
         const completedMissions = [];
 
         for (const focusMission of missions){
-            if(focusedTime >= focusMission.mission.targetValue){
+            if(totalFocusedTime >= focusMission.mission.targetValue){
                 await prisma.memberMission.update({
                     where: {id: focusMission.id},
                     data: {completed: true},
                 });
+                missionUtils.unlockFlower(memberId, focusMission.mission.flower.id);
                 completedMissions.push({
                     missionId: focusMission.id,
                     flower: focusMission.mission.flower?
@@ -208,7 +194,7 @@ const updateFocusTimeMission = async(memberId, focusTime) => {
 // 심은 꽃 미션(새로운 꽃 심을 경우-집중 시간 저장 시)
 const updateTotalFlowerMission = async(memberId) => {
     try{
-        const cntUniqueFlowers = calculateTotalFlowersMissionValue(memberId);  //심은 꽃 개수
+        const cntUniqueFlowers = missionUtils.calculateTotalFlowersMissionValue(memberId);  //심은 꽃 개수
     
         const flowerMissions = await prisma.memberMission.findMany({
         where: {
@@ -227,6 +213,7 @@ const updateTotalFlowerMission = async(memberId) => {
                     where: { id: flowerMission.id },
                     data: { completed: true },
                 });
+                missionUtils.unlockFlower(memberId, flowerMission.mission.flower.id);
                 completedMissions.push({
                     missionId: flowerMission.id,
                     flower: flowerMission.mission.flower?

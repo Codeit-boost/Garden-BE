@@ -307,7 +307,7 @@ const endFocusTimeById = async (memberId, focusTimeId) => {
       });
 
       //미션 업데이트 
-      const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId, canceledFocusTime.time);
+      const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId);
       const completedFlowerMissions = await missionService.updateTotalFlowerMission(memberId);
   
       return {
@@ -357,7 +357,7 @@ const completeFocusTimeById = async (memberId, focusTimeId) => {
     });
 
     //미션 업데이트 
-    const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId, updatedFocusTime.time);
+    const completedFocusTimeMissions = await missionService.updateFocusTimeMission(memberId);
     const completedFlowerMissions = await missionService.updateTotalFlowerMission(memberId);
     
     return {
