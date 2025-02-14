@@ -1,6 +1,6 @@
-const growthImg1 = "";
-const growthImg2 = "";
-const growthImg3 = "";
+const growthImg1 = "https://garden-c.kro.kr/images/level1.png";
+const growthImg2 = "https://garden-c.kro.kr/images/level2.png";
+const growthImg3 = "https://garden-c.kro.kr/images/level3.png";
 const witherImg = "";
 
 /**
