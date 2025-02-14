@@ -70,4 +70,4 @@
 ![서버 구조](docs/서버구조.jpeg)
 
 ## 🛢️ ERD (데이터베이스 구조)
-![ERD](docs/erd.jpeg)
+![ERD](docs/erd.png)
