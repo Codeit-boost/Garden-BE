@@ -57,14 +57,14 @@ router.get('/unlocked', authMiddleware, asyncHandler(getUnlockedFlowers));
  * @swagger
  * /api/flower/unlocked:
  *   get:
- *     summary: "사용자의 잠금 해제된 꽃 목록 조회"
- *     description: "로그인한 사용자가 잠금 해제한 꽃들의 목록을 반환합니다."
+ *     summary: "사용자의 미션 목록 조회"
+ *     description: "로그인한 사용자가 보유한 미션 목록을 반환합니다."
  *     tags: [Flowers]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: "성공적으로 잠금 해제된 꽃 목록 조회"
+ *         description: "성공적으로 미션 목록 조회"
  *         content:
  *           application/json:
  *             schema:
@@ -72,18 +72,35 @@ router.get('/unlocked', authMiddleware, asyncHandler(getUnlockedFlowers));
  *               items:
  *                 type: object
  *                 properties:
- *                   memberId:
+ *                   title:
+ *                     type: string
+ *                     description: "미션 제목"
+ *                     example: "3일 연속 심기"
+ *                   description:
+ *                     type: string
+ *                     description: "미션 설명"
+ *                     example: "연속 3일 동안 꽃을 심었어요"
+ *                   type:
+ *                     type: string
+ *                     description: "미션 타입"
+ *                     enum: [CONSECUTIVE_PLANTING, TOTAL_FLOWERS, FOCUS_TIME]
+ *                     example: "CONSECUTIVE_PLANTING"
+ *                   targetValue:
  *                     type: integer
- *                     description: "회원 ID"
- *                   flowerId:
+ *                     description: "미션 목표값"
+ *                     example: 3
+ *                   currentValue:
  *                     type: integer
- *                     description: "꽃 ID"
- *                   unlocked:
+ *                     description: "현재 진행 값"
+ *                     example: 2
+ *                   completed:
  *                     type: boolean
- *                     description: "잠금 해제 여부"
- *                   flower:
- *                     type: object
- *                     description: "꽃 상세 정보"
+ *                     description: "미션 달성 여부"
+ *                     example: false
+ *                   flowerName:
+ *                     type: string
+ *                     description: "관련 꽃 이름"
+ *                     example: "초롱꽃"
  *       401:
  *         description: "인증 실패"
  *       500:
