@@ -131,11 +131,19 @@ const getMemberInfo = async (memberId) => {
     ORDER BY "total_time" ASC
     LIMIT 1
   `;
-
+  
+  member.currentTotalTime = convertSecondsToHHMM(member.currentTotalTime)
   // 쿼리 결과가 있을 경우 해당 집중시간 총합을, 없으면 null로 추가
   // BigInt → Number 변환 후 연산
-  member.nextTotalTime = result[0]?.total_time ? convertSecondsToHHMM(Number(result[0].total_time) - currentTotalTime) : null;
-  member.currentTotalTime = convertSecondsToHHMM(member.currentTotalTime)
+  //게이지 퍼센트
+  if(result[0]?.total_time){
+    member.nextTotalTime = convertSecondsToHHMM(Number(result[0].total_time) - currentTotalTime);
+    member.percent =  Math.floor((currentTotalTime / Number(result[0].total_time)) * 100);
+  }
+  else{
+    member.nextTotalTime = "1등입니다!";
+    member.percent = 100;
+  }
 
   const { focusTimes, ...data } = member;
   
