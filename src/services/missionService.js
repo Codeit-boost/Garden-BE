@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const { CustomError, ErrorCodes } = require('../utils/error');
 const missionUtils = require('../utils/missionUtils');
+const { format } = require('morgan');
 
 const prisma = new PrismaClient();
 
@@ -21,13 +22,22 @@ const uncompletedMission = async (memberId) => {
         },
       });
   
-      const uncompletedMissionList = [];
-      const completedMissionList = [];
+      const missionList = [];
       
       for (const mission of missions){
         const currentValue = await missionUtils.calculateCurrentValue(memberId, mission);
         const completed = currentValue >= mission.mission.targetValue;
         
+        const formatMission = {
+            title: mission.mission.title,
+            description: mission.mission.description,
+            type: mission.mission.type,
+            targetValue: mission.mission.targetValue,
+            currentValue: currentValue,
+            completed,
+            flowerName: mission.mission.flower.name,
+        };
+
         //완료된 미션
         if(completed){
             //완료처리
@@ -39,31 +49,11 @@ const uncompletedMission = async (memberId) => {
                 },
             });
             //꽃 해제
-            missionUtils.unlockFlower(memberId, mission.mission.flower.id);
-
-            completedMissionList.push({
-                missionId: mission.id,
-                flower: mission.mission.flower?
-                {
-                    name: mission.mission.flower.name, 
-                    FlowerImg: mission.mission.flower.FlowerImg
-                } : null
-            });
-        }else{
-            //완료X미션
-            const formatMission = {
-                title: mission.mission.title,
-                description: mission.mission.description,
-                type: mission.mission.type,
-                targetValue: mission.mission.targetValue,
-                currentValue: currentValue,
-                completed,
-                flowerName: mission.mission.flower.name,
-            };
-
-            uncompletedMissionList.push(formatMission);
-        }}
-        return { completedMissions: completedMissionList, uncompletedMissions: uncompletedMissionList };
+            await missionUtils.unlockFlower(memberId, mission.mission.flower.id);
+        }
+        missionList.push(formatMission);
+      }
+      return { missionList };
     } catch (error) {
       console.error(error);
       throw new CustomError(ErrorCodes.InternalServerError,"사용자의 미션 목록 조회 중 오류가 발생하였습니다.");
@@ -121,7 +111,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
                     lastUpdated: today,
                 },
                 });
-                missionUtils.unlockFlower(memberId, plantingMission.mission.flower.id);
+                await missionUtils.unlockFlower(memberId, plantingMission.mission.flower.id);
                 completedMissions.push({
                     missionId: plantingMission.id,
                     flower: plantingMission.mission.flower?
@@ -173,7 +163,7 @@ const updateFocusTimeMission = async(memberId) => {
                     where: {id: focusMission.id},
                     data: {completed: true},
                 });
-                missionUtils.unlockFlower(memberId, focusMission.mission.flower.id);
+                await missionUtils.unlockFlower(memberId, focusMission.mission.flower.id);
                 completedMissions.push({
                     missionId: focusMission.id,
                     flower: focusMission.mission.flower?
@@ -213,7 +203,7 @@ const updateTotalFlowerMission = async(memberId) => {
                     where: { id: flowerMission.id },
                     data: { completed: true },
                 });
-                missionUtils.unlockFlower(memberId, flowerMission.mission.flower.id);
+                await missionUtils.unlockFlower(memberId, flowerMission.mission.flower.id);
                 completedMissions.push({
                     missionId: flowerMission.id,
                     flower: flowerMission.mission.flower?
