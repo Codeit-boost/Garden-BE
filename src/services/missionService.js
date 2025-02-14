@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { CustomError, ErrorCodes } = require('../utils/error');
 const missionUtils = require('../utils/missionUtils');
-const { format } = require('morgan');
 
 const prisma = new PrismaClient();
 
