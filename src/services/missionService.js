@@ -70,7 +70,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
   
     try{
         // DB의 UTC 시간을 KST 기준으로 조회
-        const todayPlantings = await prisma.flower.count({
+        const todayPlantings = await prisma.focusTime.count({           
             where: {
                 memberId: Number(memberId),
                 createdAt: {
@@ -86,6 +86,17 @@ const updateConsecutivePlantingMission = async(memberId) => {
             return [];
         }
 
+        //어제 심었는지 확인
+        const yesterdayPlantings = await prisma.focusTime.count({
+            where: {
+                memberId: Number(memberId),
+                createdAt: {
+                    gte: new Date(yesterday.getTime() - kstOffset),
+                    lt: new Date(yesterday.getTime() + 24 * 60 * 60 * 1000 - kstOffset),
+                },
+            },
+        });
+
         const missions = await prisma.memberMission.findMany({
             where: {
                 memberId,
@@ -99,6 +110,7 @@ const updateConsecutivePlantingMission = async(memberId) => {
         const completedMissions = [];
     
         for (const plantingMission of missions){
+            let reset = yesterdayPlantings === 0;       //어제 focusTime이 없으면 reset
             // DB의 UTC 시간을 KST로 변환
             const lastUpdated = plantingMission.lastUpdated ? 
                 new Date(plantingMission.lastUpdated.getTime() + kstOffset) : null;
@@ -106,16 +118,16 @@ const updateConsecutivePlantingMission = async(memberId) => {
                 new Date(plantingMission.startDate.getTime() + kstOffset) : null;
             
             //날짜 계산 편하게 자정으로 다 맞춤
-            if (lastUpdated) lastUpdated.setHours(0, 0, 0, 0);
-            if (startDate) startDate.setHours(0, 0, 0, 0);
+            //if (lastUpdated) lastUpdated.setHours(0, 0, 0, 0);
+            //if (startDate) startDate.setHours(0, 0, 0, 0);
 
-            let reset = false;
+            //reset = false;
             
             //마지막 업데이트가 어제가 아니면 연속심기 초기화
-            if (!lastUpdated || lastUpdated.getTime() !== yesterday.getTime()) {
-                reset = true;
-            }
-
+            //if (!lastUpdated || lastUpdated.getTime() !== yesterday.getTime()) {
+            //    reset = true;
+            //}
+            
             if (reset || !startDate) {
                 //미션 초기화 또는 새로 시작
                 await prisma.memberMission.update({
@@ -163,7 +175,8 @@ const updateConsecutivePlantingMission = async(memberId) => {
         //console.log(completedMissions);     //점검용
         return completedMissions;
     } catch(error) {
-        throw new CustomError(ErrorCodes.InternalServerError, '연속 심기기 미션 업데이트 중 오류가 발생하였습니다.');
+        console.error(error);
+        throw new CustomError(ErrorCodes.InternalServerError, '연속 심기 미션 업데이트 중 오류가 발생하였습니다.');
     }
 };
   
