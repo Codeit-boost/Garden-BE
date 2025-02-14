@@ -52,7 +52,7 @@ const uncompletedMission = async (memberId) => {
         }
         missionList.push(formatMission);
       }
-      return { missionList };
+      return missionList;
     } catch (error) {
       console.error(error);
       throw new CustomError(ErrorCodes.InternalServerError,"사용자의 미션 목록 조회 중 오류가 발생하였습니다.");
