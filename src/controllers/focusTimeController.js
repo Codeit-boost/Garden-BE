@@ -51,8 +51,10 @@ const updateFocusTimeCategory = async (req, res) => {
 const cancelFocusTime = async (req, res) => {
     const memberId = req.user.id;
     const { focusTimeId } = req.params;
-    removeEventsByMemberId(memberId);
     const endFocusTime = await focusTimeService.endFocusTimeById(memberId, focusTimeId);
+    if(endFocusTime){ // 데이터 베이스에서 종료가 되면 이벤트에서 삭제
+        await removeEventsByMemberId(memberId);
+    }
     res.status(200).json(endFocusTime);
 };
 
