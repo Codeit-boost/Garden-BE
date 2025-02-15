@@ -123,7 +123,7 @@ setInterval(async () => {
             data.message = "집중 시간 완료"
             data.index = event.quarter + 1
             sse.broadcast(event.memberId, data)
-            focusTimeService.completeFocusTimeById(event.memberId, event.data.id);
+            await focusTimeService.completeFocusTimeById(event.memberId, event.data.id);
           }
         }else{// 스톱워치
           console.log(`⌛ FocusTime ${event.data.id}: Quarter ${event.quarter} reached`);
@@ -142,7 +142,7 @@ setInterval(async () => {
         }
       }else{ // sse에 클라이언트가 없다면 종료 또는 취소
         console.log("sse미연결로 삭제")
-        focusTimeService.endFocusTimeById(event.memberId, event.data.id);
+        await focusTimeService.endFocusTimeById(event.memberId, event.data.id);
       }
     }
   } catch (error) {
